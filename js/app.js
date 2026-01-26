@@ -27,6 +27,7 @@ const App = {
         // Game
         this.backToLobbyBtn = document.getElementById('back-to-lobby');
         this.gameGoldDisplay = document.getElementById('game-gold-display');
+        this.currentPrizeDisplay = document.getElementById('current-prize-display');
         this.gameTitle = document.getElementById('game-title');
 
         // Phase 1
@@ -115,12 +116,13 @@ const App = {
             this.targetCountSpan.textContent = mode.targetCount;
 
             // Render Inputs
-            this.renderNumberInputs(mode.targetCount);
+            this.renderNumberInputs(mode.targetCount, mode.maxNumber);
 
             // Show Setup Phase
             this.setupPhase.classList.remove('hidden');
             this.playPhase.classList.add('hidden');
             this.gameResult.classList.add('hidden');
+            this.currentPrizeDisplay.classList.add('hidden');
             this.setupError.textContent = '';
 
             this.showScreen('game');
@@ -129,14 +131,14 @@ const App = {
         }
     },
 
-    renderNumberInputs: function(count) {
+    renderNumberInputs: function(count, maxNumber) {
         this.numberInputsContainer.innerHTML = '';
         for (let i = 0; i < count; i++) {
             const input = document.createElement('input');
             input.type = 'number';
             input.min = 1;
-            input.max = 30; // Arbitrary limit for UI
-            input.placeholder = `#${i+1}`;
+            input.max = maxNumber;
+            input.placeholder = `1-${maxNumber}`;
             input.className = 'number-input';
             this.numberInputsContainer.appendChild(input);
         }
@@ -150,7 +152,7 @@ const App = {
 
         inputs.forEach(input => {
             const val = parseInt(input.value);
-            if (isNaN(val) || val < 1) {
+            if (isNaN(val)) {
                 valid = false;
             }
             if (seen.has(val)) {
@@ -171,6 +173,8 @@ const App = {
 
             this.renderBoard();
             this.gameStatus.textContent = `Find ${Game.MODES[Game.state.currentModeIndex].targetCount} targets!`;
+            this.updatePrizeDisplay();
+            this.currentPrizeDisplay.classList.remove('hidden');
 
             this.setupPhase.classList.add('hidden');
             this.playPhase.classList.remove('hidden');
@@ -179,33 +183,56 @@ const App = {
         }
     },
 
+    updatePrizeDisplay: function() {
+        const potential = Game.getPotentialPrize();
+        this.currentPrizeDisplay.textContent = `Next Prize: ${potential.toLocaleString()}`;
+    },
+
     renderBoard: function() {
         this.cardsGrid.innerHTML = '';
         Game.state.cards.forEach((card, index) => {
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.dataset.index = index;
-            // Initially hidden
-            cardEl.textContent = '?';
+
+            // Structure for 3D Flip
+            const inner = document.createElement('div');
+            inner.className = 'card-inner';
+
+            // The Front (Face Down) - Question Mark
+            const front = document.createElement('div');
+            front.className = 'card-front';
+            front.textContent = '?';
+
+            // The Back (Face Up) - Number
+            const back = document.createElement('div');
+            back.className = 'card-back';
+            back.textContent = ''; // Will be filled on reveal
+
+            inner.appendChild(front);
+            inner.appendChild(back);
+            cardEl.appendChild(inner);
+
             this.cardsGrid.appendChild(cardEl);
         });
     },
 
     handleCardClick: function(e) {
-        if (!e.target.classList.contains('card')) return;
+        const cardEl = e.target.closest('.card');
+        if (!cardEl) return;
 
-        const index = parseInt(e.target.dataset.index);
+        const index = parseInt(cardEl.dataset.index);
         const result = Game.revealCard(index);
 
-        if (!result) return; // Ignore click
+        if (!result) return; // Ignore click (already revealed, etc)
 
-        this.updateCard(e.target, result.card);
+        this.updateCard(cardEl, result.card);
+        this.updatePrizeDisplay();
 
         if (result.gameOver) {
             if (result.win) {
                 this.resultMessage.textContent = `You Won ${result.prize.toLocaleString()} Gold!`;
             } else {
-                // Logic currently only supports winning eventually, but if we add lose conditions later...
                 this.resultMessage.textContent = 'Game Over';
             }
             this.gameResult.classList.remove('hidden');
@@ -215,11 +242,13 @@ const App = {
 
     updateCard: function(cardEl, cardState) {
         cardEl.classList.add('revealed');
-        cardEl.textContent = cardState.value;
+        const back = cardEl.querySelector('.card-back');
+        back.textContent = cardState.value;
+
         if (cardState.isTarget) {
-            cardEl.classList.add('target');
+            back.classList.add('target');
         } else {
-            cardEl.classList.add('dud');
+            back.classList.add('dud');
         }
     }
 };

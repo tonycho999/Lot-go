@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #e0e5ec;
+    background-color: #f8f1d3; /* Banana Cream Background */
     margin: 0;
     padding: 20px;
     display: flex;
@@ -12,11 +12,11 @@ body {
 }
 
 #app {
-    background: #f0f3f7;
+    background: #ffffff;
     padding: 2.5rem;
-    border-radius: 20px;
+    border-radius: 25px;
     box-shadow:
-        10px 10px 20px #bebebe,
+        10px 10px 20px rgba(220, 200, 150, 0.4),
         -10px -10px 20px #ffffff;
     width: 100%;
     max-width: 650px;
@@ -43,7 +43,7 @@ body {
 
 /* Typography */
 h1, h2, h3 {
-    color: #2d3436;
+    color: #4a4036; /* Dark Brown */
     margin-bottom: 1rem;
 }
 
@@ -56,31 +56,33 @@ input {
     padding: 12px 15px;
     width: 80%;
     margin-bottom: 10px;
-    border: none;
+    border: 1px solid #e0e0e0;
     border-radius: 50px;
-    background: #e0e5ec;
-    box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+    background: #fffdf5;
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.05);
     font-size: 1rem;
-    color: #333;
+    color: #4a4036;
     outline: none;
+    text-align: center;
 }
 
 button {
     padding: 12px 25px;
-    background-color: #6c5ce7;
-    color: white;
+    background-color: #f1c40f; /* Banana Yellow */
+    color: #4a4036; /* Dark Brown */
     border: none;
     border-radius: 50px;
     cursor: pointer;
     font-size: 1rem;
-    font-weight: 600;
-    box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+    font-weight: 700;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px #ffffff;
     transition: all 0.2s ease;
 }
 
 button:hover {
+    background-color: #f39c12;
     transform: translateY(-2px);
-    box-shadow: 7px 7px 14px #bebebe, -7px -7px 14px #ffffff;
+    box-shadow: 7px 7px 14px rgba(0,0,0,0.1), -7px -7px 14px #ffffff;
 }
 
 button:active {
@@ -89,7 +91,7 @@ button:active {
 }
 
 .error {
-    color: #d63031;
+    color: #e74c3c;
     margin-top: 10px;
     font-weight: 500;
 }
@@ -98,14 +100,14 @@ button:active {
 .gold-display {
     font-size: 1.4rem;
     font-weight: bold;
-    color: #f1c40f;
-    background: #2d3436;
+    color: #f39c12;
+    background: #fffdf5;
     padding: 12px 25px;
     border-radius: 50px;
     margin-bottom: 25px;
     display: inline-block;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    border: 2px solid #f1c40f;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .mode-selection {
@@ -114,26 +116,32 @@ button:active {
 }
 
 .mode-btn {
-    background: linear-gradient(145deg, #ffffff, #e6e6e6);
-    color: #2d3436;
-    border: none;
-    border-radius: 15px;
+    background: white;
+    color: #4a4036;
+    border: 1px solid #eee;
+    border-radius: 20px;
     padding: 20px;
     transition: transform 0.2s;
-    box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+.mode-btn:hover {
+    border-color: #f1c40f;
+    transform: translateY(-2px);
+    background: #fffdf0;
+}
+
 .mode-btn h3 {
     margin: 0 0 5px 0;
-    color: #6c5ce7;
+    color: #f39c12;
 }
 
 .mode-btn p {
     margin: 2px 0;
-    color: #636e72;
+    color: #7f8c8d;
 }
 
 /* Game */
@@ -142,14 +150,21 @@ button:active {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    background: #dfe6e9;
-    padding: 10px 20px;
+    background: #fffdf5;
+    padding: 15px 25px;
     border-radius: 50px;
+    border: 1px solid #f1c40f;
 }
 
 #game-gold-display {
     font-weight: bold;
     color: #d35400;
+}
+
+#current-prize-display {
+    font-weight: bold;
+    color: #27ae60;
+    margin: 0 10px;
 }
 
 .inputs-container {
@@ -161,174 +176,97 @@ button:active {
 }
 
 .number-input {
-    width: 50px;
-    text-align: center;
+    width: 60px;
     font-weight: bold;
 }
 
-/* Card Grid - Sophisticated Design */
+/* Card Grid - 3D Flip & Banana Theme */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 15px;
     margin-top: 30px;
-    perspective: 1000px; /* Essential for 3D flip */
+    perspective: 1000px;
 }
 
 .card {
     height: 120px;
-    border-radius: 12px;
     cursor: pointer;
-    font-size: 1.8rem;
-    font-weight: 800;
     user-select: none;
     position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    /* No transformation here on container itself for flip, inner does it */
 }
 
-.card:hover {
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.card:hover .card-inner {
     transform: translateY(-5px);
 }
 
-/* Card Faces */
-.card::before, .card::after {
+.card.revealed .card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Faces */
+.card-front, .card-back {
     position: absolute;
     width: 100%;
     height: 100%;
-    backface-visibility: hidden;
+    backface-visibility: hidden; /* Hides back of rotated element */
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 12px;
-    top: 0;
-    left: 0;
+    border-radius: 15px;
+    font-size: 2rem;
+    font-weight: 800;
 }
 
-/* Front (Hidden state) - Now technically the "front" in CSS 3D terms usually is the initial state,
-   but here we'll use a single element handling state via classes, or pseudo-elements.
-   However, since we are changing text content in JS, the simplest 'flip' is visual styling based on .revealed class.
-*/
-
-/*
-   Refined Approach:
-   The JS sets .revealed class.
-   We will style the base .card as the "back" (hidden), and .card.revealed as the "front" (shown).
-   But to do a real flip, we need to rotate it.
-*/
-
-.card {
-    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-    color: rgba(255,255,255,0.8);
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-    border: 2px solid rgba(255,255,255,0.1);
-}
-
-/* Pattern for card back */
-.card::before {
-    content: '?';
-    font-family: 'Courier New', monospace;
-}
-
-.card.revealed {
-    transform: rotateY(180deg);
-    cursor: default;
-}
-
-/* Since we replace textContent in JS, the ::before '?' might conflict if we aren't careful.
-   JS sets textContent to '?' initially, then to the number.
-   Let's rely on the element content, but style the backgrounds.
-*/
-
-.card {
-    /* Reset ::before for the main card logic used in JS */
-}
-.card::before { display: none; }
-
-/* RE-DOING CARD LOGIC FOR VISUALS:
-   We will keep the JS logic (textContent change) but style it to look good.
-   If we want a real 3D flip with different content on back/front, we'd typically need HTML structure changes.
-   But we can fake it or just make the transition smooth.
-
-   Let's stick to the JS logic:
-   1. Card is Blue (?)
-   2. Click -> JS changes content -> Adds .revealed
-   3. CSS rotates it.
-
-   Problem: If we rotate 180deg, the text will be mirrored unless we handle it.
-*/
-
-.card {
-    /* Back of card (Unrevealed) */
-    background: linear-gradient(135deg, #0984e3, #74b9ff);
-    color: white;
-}
-
-.card.revealed {
-    /* Front of card (Revealed) - We rotate it back to 0 or rotate to 180?
-       Let's just change the look without a full 3D flip rotation if we don't change HTML structure
-       because handling the mirrored text with a single div is tricky without a container.
-
-       Alternative: A simple scale flip.
-    */
-    transform: scaleX(-1); /* Quick flip simulation part 1 */
-    transition: transform 0.3s;
-}
-/* Wait, scaleX(-1) mirrors text. */
-
-/* Better design without changing HTML structure:
-   Use a visually pleasing transition.
-*/
-
-.card {
-    transition: all 0.4s ease;
-    background: linear-gradient(135deg, #34495e, #2c3e50); /* Dark Elegant Back */
-    color: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 14px rgba(0,0,0,0.3);
-}
-
-.card.revealed {
-    transform: rotateY(360deg); /* Full spin reveal */
-}
-
-/* Target Card (Winning) */
-.card.revealed.target {
-    background: radial-gradient(circle, #f1c40f 0%, #f39c12 100%);
+/* Front (Face Down - Question Mark) */
+.card-front {
+    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); /* Yellow Banana Gradient */
     color: #fff;
-    border: 2px solid #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-    box-shadow: 0 0 15px #f1c40f;
-    animation: pulse 1.5s infinite;
+    border: 2px solid white;
 }
 
-/* Dud Card (Losing) */
-.card.revealed.dud {
-    background: #ecf0f1;
+/* Back (Face Up - Number) */
+.card-back {
+    background-color: #ffffff;
+    color: #2d3436;
+    transform: rotateY(180deg); /* Pre-rotated so it shows correctly when container flips 180 */
+    border: 2px solid #ecf0f1;
+}
+
+/* Target Style */
+.card-back.target {
+    background: #e67e22; /* Orange/Gold */
+    color: white;
+    border: 3px solid #f1c40f;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Dud Style */
+.card-back.dud {
+    background: #bdc3c7;
     color: #7f8c8d;
-    border: 1px solid #bdc3c7;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
 }
 
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
-}
-
+/* Result */
 #game-result {
     margin-top: 30px;
     padding: 20px;
-    background: #00b894;
-    color: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,184,148,0.3);
+    background: #fff;
+    border: 2px solid #2ecc71;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2);
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -340,13 +278,5 @@ button:active {
 #result-message {
     font-size: 1.5rem;
     margin-bottom: 15px;
-}
-
-#collect-btn {
-    background: white;
-    color: #00b894;
-    box-shadow: none;
-}
-#collect-btn:hover {
-    background: #f1f2f6;
+    color: #27ae60;
 }
