@@ -1,8 +1,8 @@
 /* css/style.css */
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e0e5ec;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -12,12 +12,14 @@ body {
 }
 
 #app {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background: #f0f3f7;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow:
+        10px 10px 20px #bebebe,
+        -10px -10px 20px #ffffff;
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     text-align: center;
 }
 
@@ -27,78 +29,111 @@ body {
 
 .screen.active {
     display: block;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .hidden {
     display: none !important;
 }
 
-/* Login */
-.form-group {
+/* Typography */
+h1, h2, h3 {
+    color: #2d3436;
     margin-bottom: 1rem;
 }
 
+/* Inputs & Buttons */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
 input {
-    padding: 10px;
+    padding: 12px 15px;
     width: 80%;
     margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: none;
+    border-radius: 50px;
+    background: #e0e5ec;
+    box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
 }
 
 button {
-    padding: 10px 20px;
-    background-color: #007bff;
+    padding: 12px 25px;
+    background-color: #6c5ce7;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 50px;
     cursor: pointer;
     font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+    transition: all 0.2s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 7px 7px 14px #bebebe, -7px -7px 14px #ffffff;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1);
 }
 
 .error {
-    color: red;
+    color: #d63031;
     margin-top: 10px;
+    font-weight: 500;
 }
 
 /* Lobby */
 .gold-display {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: bold;
-    color: #ffd700;
-    background: #333;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+    color: #f1c40f;
+    background: #2d3436;
+    padding: 12px 25px;
+    border-radius: 50px;
+    margin-bottom: 25px;
     display: inline-block;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .mode-selection {
     display: grid;
-    gap: 15px;
+    gap: 20px;
 }
 
 .mode-btn {
-    background: #f8f9fa;
-    color: #333;
-    border: 1px solid #ddd;
-    padding: 15px;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    color: #2d3436;
+    border: none;
+    border-radius: 15px;
+    padding: 20px;
     transition: transform 0.2s;
+    box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.mode-btn:hover {
-    transform: translateY(-2px);
-    background: #e9ecef;
+.mode-btn h3 {
+    margin: 0 0 5px 0;
+    color: #6c5ce7;
+}
+
+.mode-btn p {
+    margin: 2px 0;
+    color: #636e72;
 }
 
 /* Game */
@@ -106,75 +141,212 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    background: #dfe6e9;
+    padding: 10px 20px;
+    border-radius: 50px;
 }
 
 #game-gold-display {
     font-weight: bold;
+    color: #d35400;
 }
 
 .inputs-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .number-input {
-    width: 60px;
+    width: 50px;
     text-align: center;
+    font-weight: bold;
 }
 
-/* Card Grid */
+/* Card Grid - Sophisticated Design */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 15px;
+    margin-top: 30px;
+    perspective: 1000px; /* Essential for 3D flip */
 }
 
 .card {
-    background-color: #007bff;
-    color: white;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
+    height: 120px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 1.8rem;
+    font-weight: 800;
     user-select: none;
-    transition: transform 0.3s, background-color 0.3s;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .card:hover {
-    filter: brightness(1.1);
+    transform: translateY(-5px);
+}
+
+/* Card Faces */
+.card::before, .card::after {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    top: 0;
+    left: 0;
+}
+
+/* Front (Hidden state) - Now technically the "front" in CSS 3D terms usually is the initial state,
+   but here we'll use a single element handling state via classes, or pseudo-elements.
+   However, since we are changing text content in JS, the simplest 'flip' is visual styling based on .revealed class.
+*/
+
+/*
+   Refined Approach:
+   The JS sets .revealed class.
+   We will style the base .card as the "back" (hidden), and .card.revealed as the "front" (shown).
+   But to do a real flip, we need to rotate it.
+*/
+
+.card {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: rgba(255,255,255,0.8);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+/* Pattern for card back */
+.card::before {
+    content: '?';
+    font-family: 'Courier New', monospace;
 }
 
 .card.revealed {
-    cursor: default;
-    background-color: #e9ecef;
-    color: #333;
     transform: rotateY(180deg);
+    cursor: default;
 }
 
+/* Since we replace textContent in JS, the ::before '?' might conflict if we aren't careful.
+   JS sets textContent to '?' initially, then to the number.
+   Let's rely on the element content, but style the backgrounds.
+*/
+
+.card {
+    /* Reset ::before for the main card logic used in JS */
+}
+.card::before { display: none; }
+
+/* RE-DOING CARD LOGIC FOR VISUALS:
+   We will keep the JS logic (textContent change) but style it to look good.
+   If we want a real 3D flip with different content on back/front, we'd typically need HTML structure changes.
+   But we can fake it or just make the transition smooth.
+
+   Let's stick to the JS logic:
+   1. Card is Blue (?)
+   2. Click -> JS changes content -> Adds .revealed
+   3. CSS rotates it.
+
+   Problem: If we rotate 180deg, the text will be mirrored unless we handle it.
+*/
+
+.card {
+    /* Back of card (Unrevealed) */
+    background: linear-gradient(135deg, #0984e3, #74b9ff);
+    color: white;
+}
+
+.card.revealed {
+    /* Front of card (Revealed) - We rotate it back to 0 or rotate to 180?
+       Let's just change the look without a full 3D flip rotation if we don't change HTML structure
+       because handling the mirrored text with a single div is tricky without a container.
+
+       Alternative: A simple scale flip.
+    */
+    transform: scaleX(-1); /* Quick flip simulation part 1 */
+    transition: transform 0.3s;
+}
+/* Wait, scaleX(-1) mirrors text. */
+
+/* Better design without changing HTML structure:
+   Use a visually pleasing transition.
+*/
+
+.card {
+    transition: all 0.4s ease;
+    background: linear-gradient(135deg, #34495e, #2c3e50); /* Dark Elegant Back */
+    color: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(0,0,0,0.3);
+}
+
+.card.revealed {
+    transform: rotateY(360deg); /* Full spin reveal */
+}
+
+/* Target Card (Winning) */
 .card.revealed.target {
-    background-color: #28a745; /* Green */
-    color: white;
-    border: 2px solid #1e7e34;
+    background: radial-gradient(circle, #f1c40f 0%, #f39c12 100%);
+    color: #fff;
+    border: 2px solid #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    box-shadow: 0 0 15px #f1c40f;
+    animation: pulse 1.5s infinite;
 }
 
+/* Dud Card (Losing) */
 .card.revealed.dud {
-    background-color: #6c757d; /* Gray */
-    color: white;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    border: 1px solid #bdc3c7;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
 }
 
 #game-result {
-    margin-top: 20px;
+    margin-top: 30px;
     padding: 20px;
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    border-radius: 8px;
+    background: #00b894;
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,184,148,0.3);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+#result-message {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+#collect-btn {
+    background: white;
+    color: #00b894;
+    box-shadow: none;
+}
+#collect-btn:hover {
+    background: #f1f2f6;
 }
