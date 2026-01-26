@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lot-Go</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="app">
+        <!-- Login Screen -->
+        <section id="login-screen" class="screen active">
+            <h1>Login to Lot-Go</h1>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" value="admin">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" value="">
+            </div>
+            <button id="login-btn">Login</button>
+            <p id="login-error" class="error"></p>
+        </section>
+
+        <!-- Lobby Screen -->
+        <section id="lobby-screen" class="screen hidden">
+            <h1>Lot-Go Lobby</h1>
+            <div class="gold-display">
+                Your Gold: <span id="user-gold">0</span>
+            </div>
+            <h2>Select Game Mode</h2>
+            <div class="mode-selection">
+                <button class="mode-btn" data-mode="0">
+                    <h3>2 / 4 Cards</h3>
+                    <p>Cost: 50 Gold</p>
+                    <p>Max Prize: 200</p>
+                </button>
+                <button class="mode-btn" data-mode="1">
+                    <h3>4 / 10 Cards</h3>
+                    <p>Cost: 100 Gold</p>
+                    <p>Max Prize: 10,000</p>
+                </button>
+                <button class="mode-btn" data-mode="2">
+                    <h3>6 / 20 Cards</h3>
+                    <p>Cost: 500 Gold</p>
+                    <p>Max Prize: 1,000,000,000</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <button id="back-to-lobby">Exit</button>
+                <span id="game-gold-display">Gold: 0</span>
+            </div>
+
+            <h2 id="game-title">Game Mode</h2>
+
+            <!-- Phase 1: Number Selection -->
+            <div id="setup-phase">
+                <p>Select <span id="target-count">X</span> distinct numbers (1-30):</p>
+                <div id="number-inputs" class="inputs-container"></div>
+                <p id="setup-error" class="error"></p>
+                <button id="start-game-btn">Start Game</button>
+            </div>
+
+            <!-- Phase 2: Card Reveal -->
+            <div id="play-phase" class="hidden">
+                <p id="game-status">Find your numbers!</p>
+                <div id="cards-grid" class="grid-container"></div>
+            </div>
+
+            <div id="game-result" class="hidden">
+                <h3 id="result-message"></h3>
+                <button id="collect-btn">Collect & Return</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
