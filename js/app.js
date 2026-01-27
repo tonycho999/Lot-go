@@ -2,6 +2,7 @@
 
 import Auth from './auth.js';
 import Multiplayer from './multiplayer.js';
+import UserStore from './store.js';
 
 const App = {
     isSignupMode: false,
@@ -14,10 +15,19 @@ const App = {
         this.initMultiplayer();
 
         // Initialize Auth Listener
-        Auth.init((user) => {
+        Auth.init(async (user) => {
             if (user) {
+                await UserStore.initUser(user);
+
+                // Sync Game Gold with Cloud Gold
+                UserStore.subscribeToUser(user.uid, (userData) => {
+                    Game.state.gold = userData.gold;
+                    this.updateGoldDisplays();
+                });
+
                 this.showLobby();
             } else {
+                UserStore.unsubscribe();
                 this.showScreen('auth');
             }
         });
@@ -45,6 +55,26 @@ const App = {
         this.modeButtons = document.querySelectorAll('.mode-btn');
         this.watchAdBtn = document.getElementById('watch-ad-btn');
         this.multiplayerBtn = document.getElementById('multiplayer-btn');
+
+        // Tabs
+        this.tabButtons = document.querySelectorAll('.tab-btn');
+        this.tabContents = document.querySelectorAll('.tab-content');
+
+        // Profile
+        this.profileEmail = document.getElementById('profile-email');
+        this.logoutBtn = document.getElementById('logout-btn');
+        this.signoutBtn = document.getElementById('signout-btn');
+
+        // Gifting
+        this.giftEmail = document.getElementById('gift-email');
+        this.giftAmount = document.getElementById('gift-amount');
+        this.sendGiftBtn = document.getElementById('send-gift-btn');
+
+        // Admin
+        this.adminPanel = document.getElementById('admin-panel');
+        this.adminGiftEmail = document.getElementById('admin-gift-email');
+        this.adminGiftAmount = document.getElementById('admin-gift-amount');
+        this.adminSendBtn = document.getElementById('admin-send-btn');
 
         // Multiplayer Lobby
         this.mpLobbyScreen = document.getElementById('multiplayer-lobby-screen');
@@ -123,6 +153,20 @@ const App = {
 
         // Delegate Join Room clicks
         this.roomsList.addEventListener('click', this.handleJoinRoomClick.bind(this));
+
+        // Tabs
+        this.tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.target.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+
+        // Profile & Gifting
+        this.logoutBtn.addEventListener('click', this.handleLogout.bind(this));
+        this.signoutBtn.addEventListener('click', this.handleLogout.bind(this)); // Same for now
+        this.sendGiftBtn.addEventListener('click', this.handleSendGift.bind(this));
+        this.adminSendBtn.addEventListener('click', this.handleAdminGrant.bind(this));
 
         this.watchAdBtn.addEventListener('click', this.handleWatchAd.bind(this));
         this.backToLobbyBtn.addEventListener('click', this.showLobby.bind(this));
@@ -213,7 +257,84 @@ const App = {
         this.isMultiplayer = false;
         this.mpRoom = null;
         Multiplayer.unsubscribeFromRooms(); // Stop listening if we leave MP lobby
+
+        // Update Profile Info
+        if (Auth.user) {
+            this.profileEmail.textContent = Auth.user.email;
+            if (Auth.user.email === 'tonycho999@gmail.com') {
+                this.adminPanel.classList.remove('hidden');
+            } else {
+                this.adminPanel.classList.add('hidden');
+            }
+        }
+
         this.showScreen('lobby');
+    },
+
+    switchTab: function(tabName) {
+        this.tabButtons.forEach(btn => {
+            if (btn.dataset.tab === tabName) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        this.tabContents.forEach(content => {
+            if (content.id === `tab-${tabName}`) content.classList.remove('hidden');
+            else content.classList.add('hidden');
+        });
+
+        if (tabName === 'profile') {
+             // Refresh displays
+             this.updateGoldDisplays();
+        }
+    },
+
+    handleLogout: async function() {
+        UserStore.unsubscribe();
+        await Auth.logout();
+        this.showScreen('auth');
+    },
+
+    handleSendGift: async function() {
+        const email = this.giftEmail.value;
+        const amount = parseInt(this.giftAmount.value);
+
+        if (!email || isNaN(amount)) {
+            alert("Invalid input");
+            return;
+        }
+
+        if (amount < 100000) {
+            alert("Minimum amount is 100,000");
+            return;
+        }
+
+        try {
+            this.sendGiftBtn.disabled = true;
+            this.sendGiftBtn.textContent = "Sending...";
+            await UserStore.sendGift(Auth.user.uid, email, amount);
+            alert("Gift Sent!");
+            this.giftEmail.value = '';
+            this.giftAmount.value = '';
+        } catch (e) {
+            alert(e.message);
+        } finally {
+            this.sendGiftBtn.disabled = false;
+            this.sendGiftBtn.textContent = "Send Gold";
+        }
+    },
+
+    handleAdminGrant: async function() {
+        const email = this.adminGiftEmail.value;
+        const amount = parseInt(this.adminGiftAmount.value);
+
+        if (!email || isNaN(amount)) return;
+
+        try {
+            await UserStore.adminGrantGold(email, amount);
+            alert("Admin Grant Successful");
+        } catch (e) {
+            alert(e.message);
+        }
     },
 
     showMultiplayerLobby: function() {
@@ -583,8 +704,14 @@ const App = {
 
         // Single Player Logic (Existing)
         try {
+            // Deduct Gold from Cloud before starting game locally
+            const cost = Game.MODES[Game.state.currentModeIndex].cost;
+            // Since Game.startGame deducts locally, we also need to deduct remotely
+            // Optimally we'd do this transactionally but for now:
+            UserStore.updateGold(Auth.user.uid, -cost);
+
             Game.startGame(selected);
-            this.updateGoldDisplays();
+            // this.updateGoldDisplays(); // Listener handles this now
 
             this.renderBoard();
             this.gameStatus.textContent = `Find ${Game.MODES[Game.state.currentModeIndex].targetCount} targets!`;
@@ -632,18 +759,24 @@ const App = {
         if (result.gameOver) {
             if (result.win) {
                 this.resultMessage.textContent = `You Won ${result.prize.toLocaleString()} Gold!`;
+                // Add Prize to Cloud
+                UserStore.updateGold(Auth.user.uid, result.prize);
             } else {
                 this.resultMessage.textContent = 'Game Over';
             }
             this.gameResult.classList.remove('hidden');
-            this.updateGoldDisplays();
+            // this.updateGoldDisplays(); // Listener handles
         }
     },
 
     updateGoldDisplays: function() {
         const gold = Game.state.gold;
-        this.userGoldDisplay.textContent = gold.toLocaleString();
-        this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
+        if (this.userGoldDisplay) this.userGoldDisplay.textContent = gold.toLocaleString();
+        if (this.gameGoldDisplay) this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
+
+        // Also update profile gold if visible
+        const profileGold = document.getElementById('profile-gold');
+        if (profileGold) profileGold.textContent = gold.toLocaleString();
     },
 
     handleWatchAd: function() {
@@ -676,8 +809,8 @@ const App = {
 
     finishAd: function() {
         this.adModal.classList.add('hidden');
-        Game.addGold(200);
-        this.updateGoldDisplays();
+        // Game.addGold(200); // Deprecated local add
+        UserStore.updateGold(Auth.user.uid, 200);
         alert("You earned 200 Gold!");
     },
 

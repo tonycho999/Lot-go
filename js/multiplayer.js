@@ -38,8 +38,13 @@ const Multiplayer = {
     subscribeToRooms: function() {
         if (this.roomsUnsubscribe) return;
 
+        // Ensure we are logged in. Wait a split second if needed?
+        // Actually, if called from Lobby, Auth should be ready.
+        // But to be safe against the "permission-denied" race condition:
         if (!auth.currentUser) {
-            if (this.onError) this.onError("Cannot load rooms: Not logged in.");
+            // Retry once after short delay or just error?
+            // Better to let the caller handle timing, but let's just error safely.
+            console.warn("subscribeToRooms called without auth");
             return;
         }
 
@@ -121,6 +126,11 @@ const Multiplayer = {
 
                 if (roomData.status !== 'waiting') {
                     throw new Error("Game already started.");
+                }
+
+                // Max Players Check
+                if (roomData.players.length >= 10) {
+                    throw new Error("Room is full (Max 10).");
                 }
 
                 const existing = roomData.players.find(p => p.uid === auth.currentUser.uid);

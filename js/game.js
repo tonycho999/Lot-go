@@ -53,6 +53,7 @@ const Game = {
      */
     setupGame: function(modeIndex) {
         const mode = this.MODES[modeIndex];
+        // Note: Gold check is local, but we'll deduct from cloud later or assume App handles sync.
         if (this.state.gold < mode.cost) {
             throw new Error("Not enough gold!");
         }
@@ -84,7 +85,7 @@ const Game = {
         }
 
         // Deduct Gold
-        this.state.gold -= mode.cost;
+        this.state.gold -= mode.cost; // Optimistic local update
         this.state.targetNumbers = selectedNumbers;
 
         // Generate Cards

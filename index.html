@@ -33,31 +33,74 @@
                 Your Gold: <span id="user-gold">0</span>
             </div>
 
-            <button id="watch-ad-btn" class="ad-btn">
-                📺 Watch Ad (+200 Gold)
-            </button>
+            <div class="lobby-tabs">
+                <button class="tab-btn active" data-tab="games">Games</button>
+                <button class="tab-btn" data-tab="profile">Profile</button>
+            </div>
 
-            <button id="multiplayer-btn" class="primary-btn" style="width:100%; margin-bottom: 20px;">
-                👥 Multiplayer Lobby
-            </button>
+            <!-- Games Tab -->
+            <div id="tab-games" class="tab-content active">
+                <button id="watch-ad-btn" class="ad-btn">
+                    📺 Watch Ad (+200 Gold)
+                </button>
 
-            <h2>Select Game Mode</h2>
-            <div class="mode-selection">
-                <button class="mode-btn" data-mode="0">
-                    <h3>2 / 4 Cards</h3>
-                    <p>Cost: 50 Gold</p>
-                    <p>Max Prize: 200</p>
+                <button id="multiplayer-btn" class="primary-btn" style="width:100%; margin-bottom: 20px;">
+                    👥 Multiplayer Lobby
                 </button>
-                <button class="mode-btn" data-mode="1">
-                    <h3>4 / 10 Cards</h3>
-                    <p>Cost: 100 Gold</p>
-                    <p>Max Prize: 10,000</p>
-                </button>
-                <button class="mode-btn" data-mode="2">
-                    <h3>6 / 20 Cards</h3>
-                    <p>Cost: 500 Gold</p>
-                    <p>Max Prize: 1,000,000,000</p>
-                </button>
+
+                <h2>Select Game Mode</h2>
+                <div class="mode-selection">
+                    <button class="mode-btn" data-mode="0">
+                        <h3>2 / 4 Cards</h3>
+                        <p>Cost: 50 Gold</p>
+                        <p>Max Prize: 200</p>
+                    </button>
+                    <button class="mode-btn" data-mode="1">
+                        <h3>4 / 10 Cards</h3>
+                        <p>Cost: 100 Gold</p>
+                        <p>Max Prize: 10,000</p>
+                    </button>
+                    <button class="mode-btn" data-mode="2">
+                        <h3>6 / 40 Cards</h3>
+                        <p>Cost: 500 Gold</p>
+                        <p>Max Prize: 1,000,000,000</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="tab-profile" class="tab-content hidden">
+                <div class="profile-card">
+                    <h3>My Profile</h3>
+                    <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                    <p><strong>Gold:</strong> <span id="profile-gold"></span></p>
+
+                    <button id="logout-btn" class="danger-btn">Logout</button>
+                    <button id="signout-btn" class="secondary-btn small-btn">Sign Out</button>
+                </div>
+
+                <div class="gifting-section">
+                    <h3>🎁 Send Gift</h3>
+                    <div class="form-group">
+                        <input type="email" id="gift-email" placeholder="Recipient Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="gift-amount" placeholder="Amount (Min 100,000)">
+                    </div>
+                    <button id="send-gift-btn">Send Gold</button>
+                </div>
+
+                <!-- Admin Panel (Hidden by default) -->
+                <div id="admin-panel" class="admin-panel hidden">
+                    <h3>🛠 Admin Panel</h3>
+                    <div class="form-group">
+                        <input type="email" id="admin-gift-email" placeholder="User Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="admin-gift-amount" placeholder="Amount">
+                    </div>
+                    <button id="admin-send-btn" class="primary-btn">Grant Gold</button>
+                </div>
             </div>
         </section>
 
@@ -82,7 +125,7 @@
                 <div class="form-group">
                     <label>Game Mode:</label>
                     <select id="room-mode">
-                        <option value="1">4 / 10 Cards</option>
+                        <!-- Only 6/40 Allowed for Multiplayer per request -->
                         <option value="2">6 / 40 Cards</option>
                     </select>
                 </div>

@@ -468,3 +468,64 @@ button:active {
     border: 1px solid #eee;
     font-weight: bold;
 }
+
+/* Lobby Tabs */
+.lobby-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: #fffdf5;
+    border: 1px solid #f1c40f;
+    border-radius: 20px;
+    color: #4a4036;
+    box-shadow: none;
+}
+
+.tab-btn.active {
+    background: #f1c40f;
+    color: white;
+}
+
+/* Profile Styles */
+.profile-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
+.gifting-section {
+    background: #fffdf5;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px dashed #f1c40f;
+    margin-bottom: 20px;
+}
+
+.danger-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.danger-btn:hover {
+    background: #c0392b;
+}
+
+.small-btn {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+    margin-top: 10px;
+}
+
+.admin-panel {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+}
