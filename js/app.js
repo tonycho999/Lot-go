@@ -35,6 +35,8 @@ const App = {
         this.authActionBtn = document.getElementById('auth-action-btn');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
+        this.confirmPasswordInput = document.getElementById('confirm-password');
+        this.confirmPasswordGroup = document.getElementById('confirm-password-group');
         this.authError = document.getElementById('auth-error');
         this.toggleAuthBtn = document.getElementById('toggle-auth-btn');
 
@@ -149,10 +151,12 @@ const App = {
             this.authTitle.textContent = "Sign Up for Lot-Go";
             this.authActionBtn.textContent = "Sign Up";
             this.toggleAuthBtn.textContent = "Login";
+            this.confirmPasswordGroup.classList.remove('hidden');
         } else {
             this.authTitle.textContent = "Login to Lot-Go";
             this.authActionBtn.textContent = "Login";
             this.toggleAuthBtn.textContent = "Sign Up";
+            this.confirmPasswordGroup.classList.add('hidden');
         }
         this.authError.textContent = "";
     },
@@ -164,6 +168,14 @@ const App = {
         if (!email || !password) {
             this.authError.textContent = "Please enter email and password";
             return;
+        }
+
+        if (this.isSignupMode) {
+            const confirm = this.confirmPasswordInput.value;
+            if (password !== confirm) {
+                this.authError.textContent = "Passwords do not match!";
+                return;
+            }
         }
 
         this.authActionBtn.disabled = true;

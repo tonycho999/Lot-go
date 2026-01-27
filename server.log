@@ -1,0 +1,7 @@
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /js/game.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /js/multiplayer.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /js/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jan/2026 07:43:43] "GET /js/firebase-config.js HTTP/1.1" 200 -
