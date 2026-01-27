@@ -38,10 +38,11 @@ const Multiplayer = {
     subscribeToRooms: function() {
         if (this.roomsUnsubscribe) return;
 
+        // Simplified query to avoid index requirements during development
+        // "Failed-precondition" error usually means a missing composite index.
         const q = query(
             collection(db, "rooms"),
-            where("status", "in", ["waiting"]), // Only show waiting rooms
-            orderBy("createdAt", "desc")
+            where("status", "==", "waiting")
         );
 
         this.roomsUnsubscribe = onSnapshot(q, (snapshot) => {
@@ -49,10 +50,14 @@ const Multiplayer = {
             snapshot.forEach(doc => {
                 rooms.push({ id: doc.id, ...doc.data() });
             });
+            // Client-side sort since we removed orderBy
+            rooms.sort((a, b) => b.createdAt - a.createdAt);
+
             if (this.onRoomsUpdate) this.onRoomsUpdate(rooms);
         }, (error) => {
             console.error("Error fetching rooms:", error);
-            if (this.onError) this.onError("Failed to load rooms.");
+            // Show exact error to user for debugging
+            if (this.onError) this.onError(`Failed to load rooms: ${error.code || error.message}`);
         });
     },
 
