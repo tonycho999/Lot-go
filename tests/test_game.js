@@ -32,7 +32,7 @@ let result1 = Game.revealCard(perfectIndices[0]);
 let result2 = Game.revealCard(perfectIndices[1]);
 
 if (!result2.gameOver || !result2.win) throw new Error("Perfect game didn't win");
-if (result2.prize !== 200) throw new Error(`Perfect game prize wrong. Expected 200, got ${result2.prize}`);
+if (result2.prize !== 198) throw new Error(`Perfect game prize wrong. Expected 198, got ${result2.prize}`);
 
 
 // 5. Imperfect Game Simulation
@@ -48,7 +48,7 @@ Game.revealCard(dudIndex); // 1st click (waste)
 Game.revealCard(targetIndices2[0]); // 2nd click (found 1)
 let finalRes = Game.revealCard(targetIndices2[1]); // 3rd click (found 2, total 3 opened)
 
-// Formula: 200 * ((4-3)/(4-2))^2 = 200 * (1/2)^2 = 200 * 0.25 = 50
-if (finalRes.prize !== 50) throw new Error(`Imperfect game prize wrong. Expected 50, got ${finalRes.prize}`);
+// Formula: 198 * ((4-3)/(4-2))^2 = 198 * (1/2)^2 = 198 * 0.25 = 49.5 -> 49
+if (finalRes.prize !== 49) throw new Error(`Imperfect game prize wrong. Expected 49, got ${finalRes.prize}`);
 
 console.log("Game Logic Tests Passed.");
