@@ -314,14 +314,26 @@ const Multiplayer = {
         if (!this.currentRoomId) return;
         const roomRef = doc(db, "rooms", this.currentRoomId);
 
-        await updateDoc(roomRef, {
-            status: 'finished',
-            winner: {
-                uid: auth.currentUser.uid,
-                name: auth.currentUser.email.split('@')[0],
-                prize: prize
-            }
-        });
+        try {
+            await runTransaction(db, async (transaction) => {
+                const roomDoc = await transaction.get(roomRef);
+                if (!roomDoc.exists()) throw new Error("Room does not exist.");
+                const data = roomDoc.data();
+
+                if (data.status === 'finished') return; // Already claimed
+
+                transaction.update(roomRef, {
+                    status: 'finished',
+                    winner: {
+                        uid: auth.currentUser.uid,
+                        name: auth.currentUser.email.split('@')[0],
+                        prize: prize
+                    }
+                });
+            });
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     // Auto Loop (Host Only)
