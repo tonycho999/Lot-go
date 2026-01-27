@@ -17,46 +17,39 @@ The application uses Email/Password authentication. You must enable this provide
 8. Click **Save**.
 
 ### 2. Enable Cloud Firestore
-The multiplayer features use Cloud Firestore to sync game state.
+The multiplayer features and user profiles use Cloud Firestore.
 
 1. In the left sidebar, click on **Build** > **Firestore Database**.
 2. Click **Create database**.
 3. Choose a location (e.g., `nam5 (us-central)` or closest to you).
 4. Start in **Test mode** (for development) or **Production mode**.
-   - *Note: In Test mode, anyone with the config can read/write your database. For production, you will need to set up Security Rules.*
 5. Click **Enable**.
 
-### 3. Firestore Rules (Basic)
-If you are in Production mode or need to reset rules, use these basic rules for development:
+### 3. Firestore Security Rules (CRITICAL)
+If you see **"Missing or insufficient permissions"** or **"permission-denied"**, you must update your rules to allow authenticated users to access the data.
+
+Since this application runs entirely in the browser (without a backend server), users need broad access to facilitate Gifting and Admin functions.
+
+1. Go to the **Rules** tab in Firestore.
+2. Replace the code with the following:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow any logged-in user to read/write everything.
+    // This is required for the Client-side Admin and Gifting features to work.
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
   }
 }
 ```
-This allows any logged-in user to read and write to the database.
 
-### 4. Troubleshooting "Permission Denied"
-If you see a "Failed to load rooms: permission-denied" error, it means the Firestore Security Rules are blocking your request.
+3. Click **Publish**.
 
-**Quick Fix for Development:**
-Set your rules to allow everyone (Test Mode):
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
-*Warning: Do not use this for production as it allows anyone to modify your database.*
+*Note: For a production application, you would use Cloud Functions to handle Gifting and Admin tasks securely. For this prototype, opening the rules is the correct solution.*
 
-**Proper Fix:**
-Ensure you are logged in successfully before accessing the multiplayer lobby. The application logic attempts to ensure this, but network latency or configuration issues might cause the user object to be null when the query runs.
+### 4. Troubleshooting
+- **"permission-denied"**: Double check Step 3. Ensure you clicked **Publish**.
+- **"configuration-not-found"**: Double check Step 1. Ensure Email/Password is **Enabled**.

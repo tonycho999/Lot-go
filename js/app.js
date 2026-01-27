@@ -316,7 +316,12 @@ const App = {
             this.giftEmail.value = '';
             this.giftAmount.value = '';
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            if (e.code === 'permission-denied') {
+                alert("Permission Denied: Please check Firestore Rules in SETUP.md");
+            } else {
+                alert(e.message);
+            }
         } finally {
             this.sendGiftBtn.disabled = false;
             this.sendGiftBtn.textContent = "Send Gold";
@@ -333,7 +338,12 @@ const App = {
             await UserStore.adminGrantGold(email, amount);
             alert("Admin Grant Successful");
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            if (e.code === 'permission-denied') {
+                alert("Permission Denied: Please check Firestore Rules in SETUP.md");
+            } else {
+                alert(e.message);
+            }
         }
     },
 
@@ -667,7 +677,8 @@ const App = {
 
         if (room.winner.uid === Auth.user.uid) {
             // I won
-            Game.addGold(room.winner.prize); // Add locally
+            // Game.addGold(room.winner.prize); // Local only, deprecated
+            UserStore.updateGold(Auth.user.uid, room.winner.prize); // Persist to Cloud
             this.resultMessage.textContent += " - YOU WON!";
         } else {
              this.resultMessage.textContent += " - You lost.";
