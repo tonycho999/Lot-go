@@ -9,17 +9,18 @@
 <body>
 
     <div id="app">
-        <!-- Login Screen -->
-        <section id="login-screen" class="screen active">
-            <h1>Login to Lot-Go</h1>
+        <!-- Auth Screen -->
+        <section id="auth-screen" class="screen active">
+            <h1 id="auth-title">Login to Lot-Go</h1>
             <div class="form-group">
-                <input type="text" id="username" placeholder="Username" value="admin">
+                <input type="email" id="email" placeholder="Email">
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder="Password" value="">
+                <input type="password" id="password" placeholder="Password">
             </div>
-            <button id="login-btn">Login</button>
-            <p id="login-error" class="error"></p>
+            <button id="auth-action-btn">Login</button>
+            <p id="toggle-auth">Don't have an account? <a href="#" id="toggle-auth-btn">Sign Up</a></p>
+            <p id="auth-error" class="error"></p>
         </section>
 
         <!-- Lobby Screen -->
@@ -31,6 +32,10 @@
 
             <button id="watch-ad-btn" class="ad-btn">
                 📺 Watch Ad (+200 Gold)
+            </button>
+
+            <button id="multiplayer-btn" class="primary-btn" style="width:100%; margin-bottom: 20px;">
+                👥 Multiplayer Lobby
             </button>
 
             <h2>Select Game Mode</h2>
@@ -50,6 +55,63 @@
                     <p>Cost: 500 Gold</p>
                     <p>Max Prize: 1,000,000,000</p>
                 </button>
+            </div>
+        </section>
+
+        <!-- Multiplayer Lobby Screen -->
+        <section id="multiplayer-lobby-screen" class="screen hidden">
+            <button id="back-to-main-lobby">⬅ Back</button>
+            <h1>Multiplayer Rooms</h1>
+
+            <div class="room-controls">
+                <button id="create-room-btn">➕ Create Room</button>
+            </div>
+
+            <div id="rooms-list" class="rooms-list">
+                <p>Loading rooms...</p>
+            </div>
+        </section>
+
+        <!-- Create Room Modal -->
+        <div id="create-room-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Create Room</h3>
+                <div class="form-group">
+                    <label>Game Mode:</label>
+                    <select id="room-mode">
+                        <option value="1">4 / 10 Cards</option>
+                        <option value="2">6 / 40 Cards</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Open Type:</label>
+                    <select id="room-open-type">
+                        <option value="turn">Turn-based (1 by 1)</option>
+                        <option value="auto">Automatic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="room-password" placeholder="Password (Optional)">
+                </div>
+                <button id="confirm-create-room">Create</button>
+                <button id="cancel-create-room" style="background:#ccc">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Multiplayer Room (Waiting) Screen -->
+        <section id="mp-room-screen" class="screen hidden">
+            <button id="leave-room-btn">⬅ Leave Room</button>
+            <h2 id="room-title">Room #123</h2>
+            <p id="room-info">Mode: 4/10 | Type: Turn-based</p>
+
+            <div class="players-list-container">
+                <h3>Players</h3>
+                <ul id="players-list"></ul>
+            </div>
+
+            <div class="room-actions">
+                <button id="mp-ready-btn">Ready</button>
+                <button id="mp-start-btn" class="hidden">Start Game</button>
             </div>
         </section>
 
@@ -75,6 +137,11 @@
             <div id="play-phase" class="hidden">
                 <p id="game-status">Find your numbers!</p>
                 <div id="cards-grid" class="grid-container"></div>
+
+                <div class="selected-numbers-container">
+                    <h3>Your Numbers:</h3>
+                    <div id="selected-numbers-list" class="numbers-list"></div>
+                </div>
             </div>
 
             <div id="game-result" class="hidden">
@@ -99,8 +166,7 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

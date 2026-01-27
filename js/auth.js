@@ -1,32 +1,59 @@
 // js/auth.js
+import { auth } from './firebase-config.js';
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 const Auth = {
-    CREDENTIALS: {
-        username: 'admin',
-        password: '999999'
+    user: null,
+
+    init: function(onAuthChangeCallback) {
+        onAuthStateChanged(auth, (user) => {
+            this.user = user;
+            if (user) {
+                console.log("User logged in:", user.email);
+                localStorage.setItem('lotgo_user', user.email);
+            } else {
+                console.log("User logged out");
+                localStorage.removeItem('lotgo_user');
+            }
+            if (onAuthChangeCallback) onAuthChangeCallback(user);
+        });
     },
 
-    /**
-     * Verifies the username and password.
-     * @param {string} username
-     * @param {string} password
-     * @returns {boolean}
-     */
-    login: function(username, password) {
-        if (username === this.CREDENTIALS.username && password === this.CREDENTIALS.password) {
-            console.log("Login Successful");
-            localStorage.setItem('lotgo_user', username);
-            return true;
+    login: async function(email, password) {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
         }
-        console.log("Login Failed");
-        return false;
     },
 
-    logout: function() {
-        localStorage.removeItem('lotgo_user');
+    signup: async function(email, password) {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    },
+
+    logout: async function() {
+        await signOut(auth);
     },
 
     isLoggedIn: function() {
-        return localStorage.getItem('lotgo_user') === this.CREDENTIALS.username;
+        return !!this.user;
+    },
+
+    getUserEmail: function() {
+        return this.user ? this.user.email : null;
     }
 };
+
+window.Auth = Auth; // Keep global for backward compat if needed, but we should import.
+export default Auth;
