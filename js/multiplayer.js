@@ -38,6 +38,11 @@ const Multiplayer = {
     subscribeToRooms: function() {
         if (this.roomsUnsubscribe) return;
 
+        if (!auth.currentUser) {
+            if (this.onError) this.onError("Cannot load rooms: Not logged in.");
+            return;
+        }
+
         // Simplified query to avoid index requirements during development
         // "Failed-precondition" error usually means a missing composite index.
         const q = query(
@@ -249,8 +254,13 @@ const Multiplayer = {
 
                 let updates = { players: newPlayers };
 
-                if (allSetup && data.hostId === auth.currentUser.uid) {
-                    // Host finalizes setup -> Generates Deck -> Playing
+                if (allSetup) {
+                    // Last player to setup triggers the start
+                    // We need to generate the deck. Since this is deterministic or random,
+                    // doing it in the transaction is fine as long as all clients agree on the result...
+                    // Wait, runTransaction runs on client. If I generate random deck here,
+                    // it writes to DB and everyone sees it. That is fine.
+
                     const maxNumber = Game.MODES[data.modeIndex].maxNumber;
                     const deck = this.generateDeck(maxNumber);
 

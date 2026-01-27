@@ -773,7 +773,7 @@ const App = {
 
     updatePrizeDisplay: function() {
         const current = Game.getCurrentPrizeValue();
-        this.currentPrizeDisplay.textContent = `Next Prize: ${current.toLocaleString()}`;
+        this.currentPrizeDisplay.textContent = `Current Prize: ${current.toLocaleString()}`;
     },
 
     renderBoard: function() {

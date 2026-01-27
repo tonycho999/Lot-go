@@ -40,3 +40,23 @@ service cloud.firestore {
 }
 ```
 This allows any logged-in user to read and write to the database.
+
+### 4. Troubleshooting "Permission Denied"
+If you see a "Failed to load rooms: permission-denied" error, it means the Firestore Security Rules are blocking your request.
+
+**Quick Fix for Development:**
+Set your rules to allow everyone (Test Mode):
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+*Warning: Do not use this for production as it allows anyone to modify your database.*
+
+**Proper Fix:**
+Ensure you are logged in successfully before accessing the multiplayer lobby. The application logic attempts to ensure this, but network latency or configuration issues might cause the user object to be null when the query runs.
