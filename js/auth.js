@@ -29,7 +29,7 @@ const Auth = {
             await signInWithEmailAndPassword(auth, email, password);
             return { success: true };
         } catch (error) {
-            return { success: false, message: error.message };
+            return { success: false, message: this.getFriendlyErrorMessage(error) };
         }
     },
 
@@ -38,8 +38,22 @@ const Auth = {
             await createUserWithEmailAndPassword(auth, email, password);
             return { success: true };
         } catch (error) {
-            return { success: false, message: error.message };
+            return { success: false, message: this.getFriendlyErrorMessage(error) };
         }
+    },
+
+    getFriendlyErrorMessage: function(error) {
+        console.error(error);
+        if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
+            return "Login failed: Email/Password login is not enabled in Firebase Console.";
+        }
+        if (error.code === 'auth/invalid-email') return "Invalid email address.";
+        if (error.code === 'auth/user-not-found') return "User not found.";
+        if (error.code === 'auth/wrong-password') return "Incorrect password.";
+        if (error.code === 'auth/email-already-in-use') return "Email already in use.";
+        if (error.code === 'auth/weak-password') return "Password should be at least 6 characters.";
+
+        return error.message;
     },
 
     logout: async function() {

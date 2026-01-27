@@ -283,24 +283,31 @@ const Multiplayer = {
         if (!this.currentRoomId) return;
         const roomRef = doc(db, "rooms", this.currentRoomId);
 
-        const snap = await getDoc(roomRef);
-        const data = snap.data();
+        try {
+            await runTransaction(db, async (transaction) => {
+                const roomDoc = await transaction.get(roomRef);
+                if (!roomDoc.exists()) throw new Error("Room does not exist.");
+                const data = roomDoc.data();
 
-        if (data.deck[index].revealed) return; // Already revealed
+                if (data.deck[index].revealed) return; // Already revealed
 
-        const newDeck = [...data.deck];
-        newDeck[index].revealed = true;
+                const newDeck = [...data.deck];
+                newDeck[index].revealed = true;
 
-        const updates = { deck: newDeck };
+                const updates = { deck: newDeck };
 
-        // Turn Logic
-        if (data.openType === 'turn') {
-            const nextIndex = (data.turnIndex + 1) % data.players.length;
-            updates.turnIndex = nextIndex;
-            updates.currentTurn = data.players[nextIndex].uid;
+                // Turn Logic
+                if (data.openType === 'turn') {
+                    const nextIndex = (data.turnIndex + 1) % data.players.length;
+                    updates.turnIndex = nextIndex;
+                    updates.currentTurn = data.players[nextIndex].uid;
+                }
+
+                transaction.update(roomRef, updates);
+            });
+        } catch (e) {
+            console.error(e);
         }
-
-        await updateDoc(roomRef, updates);
     },
 
     claimWin: async function(prize) {
