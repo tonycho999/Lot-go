@@ -184,21 +184,21 @@ const Game = {
         if (denominator === 0) return mode.maxPrize;
 
         const factor = numerator / denominator;
-        const prize = Math.floor(mode.maxPrize * Math.pow(factor, 2));
+        // Clamp factor to 1 (can't win more than maxPrize)
+        const clampedFactor = Math.min(1, factor);
+
+        const prize = Math.floor(mode.maxPrize * Math.pow(clampedFactor, 2));
 
         return Math.max(0, prize);
     },
 
     /**
-     * Calculates the prize assuming the user finds the remaining targets
-     * with zero mistakes from this point forward.
+     * Calculates the prize based on the current revealed count.
+     * Use this for display if we want to show "Current Pot" status
+     * rather than "Projected Win".
      */
-    getPotentialPrize: function() {
-        const mode = this.MODES[this.state.currentModeIndex];
-        const remainingTargets = mode.targetCount - this.state.foundTargets;
-        // The minimum cards we MUST reveal to win from here is current revealed + remaining targets
-        const projectedRevealed = this.state.revealedCount + remainingTargets;
-        return this.calculateRewardForRevealed(projectedRevealed);
+    getCurrentPrizeValue: function() {
+        return this.calculateRewardForRevealed(this.state.revealedCount);
     },
 
     shuffle: function(array) {

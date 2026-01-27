@@ -184,8 +184,8 @@ const App = {
     },
 
     updatePrizeDisplay: function() {
-        const potential = Game.getPotentialPrize();
-        this.currentPrizeDisplay.textContent = `Next Prize: ${potential.toLocaleString()}`;
+        const current = Game.getCurrentPrizeValue();
+        this.currentPrizeDisplay.textContent = `Next Prize: ${current.toLocaleString()}`;
     },
 
     renderBoard: function() {
