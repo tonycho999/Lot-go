@@ -44,6 +44,10 @@ const Game = {
         lastPrize: 0
     },
 
+    addGold: function(amount) {
+        this.state.gold += amount;
+    },
+
     /**
      * Prepares the game state for number selection.
      */

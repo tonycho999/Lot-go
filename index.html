@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lot-Go</title>
     <link rel="stylesheet" href="css/style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7272957295128241"
-     crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -30,6 +28,11 @@
             <div class="gold-display">
                 Your Gold: <span id="user-gold">0</span>
             </div>
+
+            <button id="watch-ad-btn" class="ad-btn">
+                📺 Watch Ad (+200 Gold)
+            </button>
+
             <h2>Select Game Mode</h2>
             <div class="mode-selection">
                 <button class="mode-btn" data-mode="0">
@@ -79,6 +82,21 @@
                 <button id="collect-btn">Collect & Return</button>
             </div>
         </section>
+
+        <!-- Ad Modal -->
+        <div id="ad-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Watching Ad...</h3>
+                <div class="ad-placeholder">
+                    <div class="spinner"></div>
+                    <p>Playing generic advertisement...</p>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="ad-progress" class="progress-bar"></div>
+                </div>
+                <p id="ad-timer">5s remaining</p>
+            </div>
+        </div>
     </div>
 
     <script src="js/auth.js"></script>

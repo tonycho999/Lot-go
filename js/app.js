@@ -23,6 +23,12 @@ const App = {
         // Lobby
         this.userGoldDisplay = document.getElementById('user-gold');
         this.modeButtons = document.querySelectorAll('.mode-btn');
+        this.watchAdBtn = document.getElementById('watch-ad-btn');
+
+        // Ad Modal
+        this.adModal = document.getElementById('ad-modal');
+        this.adTimer = document.getElementById('ad-timer');
+        this.adProgress = document.getElementById('ad-progress');
 
         // Game
         this.backToLobbyBtn = document.getElementById('back-to-lobby');
@@ -58,6 +64,7 @@ const App = {
             });
         });
 
+        this.watchAdBtn.addEventListener('click', this.handleWatchAd.bind(this));
         this.backToLobbyBtn.addEventListener('click', this.showLobby.bind(this));
         this.startGameBtn.addEventListener('click', this.handleStartGame.bind(this));
 
@@ -104,6 +111,41 @@ const App = {
         const gold = Game.state.gold;
         this.userGoldDisplay.textContent = gold.toLocaleString();
         this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
+    },
+
+    handleWatchAd: function() {
+        this.adModal.classList.remove('hidden');
+        let secondsLeft = 5;
+        this.adTimer.textContent = `${secondsLeft}s remaining`;
+        this.adProgress.style.width = '0%';
+
+        let elapsed = 0;
+        const totalTime = 5000;
+        const intervalStep = 100;
+
+        const timer = setInterval(() => {
+            elapsed += intervalStep;
+            const progress = (elapsed / totalTime) * 100;
+            this.adProgress.style.width = `${progress}%`;
+
+            const currentSeconds = Math.ceil((totalTime - elapsed) / 1000);
+            if (currentSeconds !== secondsLeft) {
+                secondsLeft = currentSeconds;
+                this.adTimer.textContent = `${secondsLeft}s remaining`;
+            }
+
+            if (elapsed >= totalTime) {
+                clearInterval(timer);
+                this.finishAd();
+            }
+        }, intervalStep);
+    },
+
+    finishAd: function() {
+        this.adModal.classList.add('hidden');
+        Game.addGold(200);
+        this.updateGoldDisplays();
+        alert("You earned 200 Gold!");
     },
 
     enterGameMode: function(modeIndex) {
