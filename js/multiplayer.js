@@ -66,8 +66,13 @@ const Multiplayer = {
             if (this.onRoomsUpdate) this.onRoomsUpdate(rooms);
         }, (error) => {
             console.error("Error fetching rooms:", error);
-            // Show exact error to user for debugging
-            if (this.onError) this.onError(`Failed to load rooms: ${error.code || error.message}`);
+
+            let message = `Failed to load rooms: ${error.code || error.message}`;
+            if (error.code === 'permission-denied') {
+                message = "Permission Denied: Please update Firestore Rules in Firebase Console (See SETUP.md).";
+            }
+
+            if (this.onError) this.onError(message);
         });
     },
 

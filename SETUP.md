@@ -5,40 +5,32 @@
 To make the application work, you need to configure your Firebase Project settings in the [Firebase Console](https://console.firebase.google.com/).
 
 ### 1. Enable Authentication
-The application uses Email/Password authentication. You must enable this provider:
-
-1. Go to your Firebase Console.
-2. Select your project (**lot-go**).
-3. In the left sidebar, click on **Build** > **Authentication**.
-4. Click **Get Started** if you haven't already.
-5. Select the **Sign-in method** tab.
-6. Click on **Email/Password**.
-7. Toggle **Enable** to **On**.
-8. Click **Save**.
+1. Go to **Build** > **Authentication**.
+2. Click **Get Started**.
+3. Select **Email/Password**.
+4. Toggle **Enable** to **On**.
+5. Click **Save**.
 
 ### 2. Enable Cloud Firestore
-The multiplayer features and user profiles use Cloud Firestore.
-
-1. In the left sidebar, click on **Build** > **Firestore Database**.
+1. Go to **Build** > **Firestore Database**.
 2. Click **Create database**.
-3. Choose a location (e.g., `nam5 (us-central)` or closest to you).
-4. Start in **Test mode** (for development) or **Production mode**.
+3. Choose a location.
+4. Start in **Test mode** or **Production mode**.
 5. Click **Enable**.
 
-### 3. Firestore Security Rules (CRITICAL)
-If you see **"Missing or insufficient permissions"** or **"permission-denied"**, you must update your rules to allow authenticated users to access the data.
-
-Since this application runs entirely in the browser (without a backend server), users need broad access to facilitate Gifting and Admin functions.
+### 3. Set Firestore Rules (CRITICAL)
+If you see **"Permission Denied"**, you must update your rules.
 
 1. Go to the **Rules** tab in Firestore.
-2. Replace the code with the following:
+2. **Delete everything** and paste this exact code:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow any logged-in user to read/write everything.
-    // This is required for the Client-side Admin and Gifting features to work.
+    // Allow any logged-in user to read/write EVERYTHING in the database.
+    // This is required for the Gifting, Admin, and Multiplayer features to work
+    // without a backend server.
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
@@ -48,8 +40,8 @@ service cloud.firestore {
 
 3. Click **Publish**.
 
-*Note: For a production application, you would use Cloud Functions to handle Gifting and Admin tasks securely. For this prototype, opening the rules is the correct solution.*
+*Warning: These rules allow any signed-in user to modify database data. This is acceptable for this prototype but not for a production banking app.*
 
 ### 4. Troubleshooting
-- **"permission-denied"**: Double check Step 3. Ensure you clicked **Publish**.
-- **"configuration-not-found"**: Double check Step 1. Ensure Email/Password is **Enabled**.
+- **"permission-denied"**: Did you click **Publish** in Step 3? Are you logged in?
+- **"configuration-not-found"**: Did you enable Email/Password in Step 1?
