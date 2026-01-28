@@ -135,6 +135,39 @@
                 <p id="ad-timer">5s remaining</p>
             </div>
         </div>
+
+        <!-- Create Room Modal -->
+        <div id="create-room-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Create New Room</h3>
+                <div class="form-group">
+                    <input type="text" id="room-title" placeholder="Room Title" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:5px; color:#4a4036;">Max Players (2-10):</label>
+                    <input type="number" id="room-max-players" min="2" max="10" value="10">
+                </div>
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:5px; color:#4a4036;">Card Mode:</label>
+                    <select id="room-card-mode" style="width: 80%; padding: 10px; border-radius: 50px; border: 1px solid #e0e0e0;">
+                        <option value="0">2 / 4 Cards</option>
+                        <option value="1">4 / 10 Cards</option>
+                        <option value="2" selected>6 / 40 Cards</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:5px; color:#4a4036;">Reveal Type:</label>
+                    <select id="room-reveal-type" style="width: 80%; padding: 10px; border-radius: 50px; border: 1px solid #e0e0e0;">
+                        <option value="auto">Auto (Server 2s)</option>
+                        <option value="manual">Manual (Turn 5s)</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                    <button id="cancel-room-btn" class="secondary-btn" style="background-color: #95a5a6;">Cancel</button>
+                    <button id="submit-room-btn">Create</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDKs (Compat) -->

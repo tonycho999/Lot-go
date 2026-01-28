@@ -20,6 +20,15 @@ const Multiplayer = {
         this.roomList = document.getElementById('room-list');
         this.errorDisplay = document.getElementById('mp-error');
 
+        // Create Room Modal
+        this.createRoomModal = document.getElementById('create-room-modal');
+        this.roomTitleInput = document.getElementById('room-title');
+        this.roomMaxPlayersInput = document.getElementById('room-max-players');
+        this.roomCardModeInput = document.getElementById('room-card-mode');
+        this.roomRevealTypeInput = document.getElementById('room-reveal-type');
+        this.submitRoomBtn = document.getElementById('submit-room-btn');
+        this.cancelRoomBtn = document.getElementById('cancel-room-btn');
+
         // Profile Tab
         this.profileUsername = document.getElementById('profile-username');
         this.profileEmail = document.getElementById('profile-email');
@@ -41,7 +50,19 @@ const Multiplayer = {
         });
 
         if (this.createRoomBtn) {
-            this.createRoomBtn.addEventListener('click', this.handleCreateRoom.bind(this));
+            this.createRoomBtn.addEventListener('click', () => {
+                this.createRoomModal.classList.remove('hidden');
+            });
+        }
+
+        if (this.cancelRoomBtn) {
+            this.cancelRoomBtn.addEventListener('click', () => {
+                this.createRoomModal.classList.add('hidden');
+            });
+        }
+
+        if (this.submitRoomBtn) {
+            this.submitRoomBtn.addEventListener('click', this.handleSubmitCreateRoom.bind(this));
         }
 
         if (this.logoutBtn) {
@@ -52,9 +73,6 @@ const Multiplayer = {
         }
     },
 
-    /**
-     * Called when entering the Multiplayer Screen
-     */
     showLobby: function() {
         this.updateProfile();
         this.fetchRooms();
@@ -92,12 +110,8 @@ const Multiplayer = {
         if (Config.isMock) {
              this.errorDisplay.textContent = "Mock Mode: Using local storage for rooms.";
              this.errorDisplay.style.color = 'orange';
-
-             // Initial load
              const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
              this.renderMockRooms(rooms);
-
-             // Poll for changes? Or just static for now since single user.
              return;
         }
 
@@ -106,7 +120,6 @@ const Multiplayer = {
             return;
         }
 
-        // Unsubscribe previous listener if any
         if (this.unsubscribeRooms) {
             this.unsubscribeRooms();
         }
@@ -120,7 +133,7 @@ const Multiplayer = {
                 console.error("Error fetching rooms:", error);
                 if (error.code === 'permission-denied') {
                      this.errorDisplay.textContent = "Permission Denied: Please check Firestore Rules.";
-                     this.errorDisplay.style.display = 'block'; // Ensure visible red banner
+                     this.errorDisplay.style.display = 'block';
                      this.errorDisplay.style.backgroundColor = '#ff4444';
                      this.errorDisplay.style.color = 'white';
                      this.errorDisplay.style.padding = '10px';
@@ -130,27 +143,60 @@ const Multiplayer = {
             });
     },
 
+    handleSubmitCreateRoom: async function() {
+        if (!Auth.currentUser) return;
+
+        const title = this.roomTitleInput.value.trim() || `${Auth.currentUser.email.split('@')[0]}'s Room`;
+        const maxPlayers = parseInt(this.roomMaxPlayersInput.value);
+        const cardMode = parseInt(this.roomCardModeInput.value);
+        const revealType = this.roomRevealTypeInput.value;
+
+        if (maxPlayers < 2 || maxPlayers > 10) {
+            alert("Players must be between 2 and 10");
+            return;
+        }
+
+        const roomData = {
+            title: title,
+            host: Auth.currentUser.uid,
+            status: 'waiting',
+            createdAt: Config.isMock ? Date.now() : firebase.firestore.FieldValue.serverTimestamp(),
+            players: [Auth.currentUser.uid],
+            maxPlayers: maxPlayers,
+            modeIndex: cardMode,
+            revealType: revealType
+        };
+
+        if (Config.isMock) {
+            const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
+            roomData.id = 'mock_room_' + Date.now();
+            rooms.push(roomData);
+            localStorage.setItem('lotgo_mock_rooms', JSON.stringify(rooms));
+            this.renderMockRooms(rooms);
+            this.createRoomModal.classList.add('hidden');
+            return;
+        }
+
+        if (!Config.db) return;
+
+        try {
+            await Config.db.collection('rooms').add(roomData);
+            this.createRoomModal.classList.add('hidden');
+            // List updates via listener
+        } catch (e) {
+            console.error("Error creating room:", e);
+            alert("Error: " + e.message);
+        }
+    },
+
     renderMockRooms: function(rooms) {
         this.roomList.innerHTML = '';
         if (rooms.length === 0) {
             this.roomList.innerHTML = '<p>No active rooms. Create one (Mock)!</p>';
             return;
         }
-        rooms.forEach((room, index) => {
-             const el = document.createElement('div');
-             el.className = 'room-item';
-             el.style.border = '1px solid #ccc';
-             el.style.padding = '10px';
-             el.style.margin = '5px 0';
-             el.style.display = 'flex';
-             el.style.justifyContent = 'space-between';
-             el.style.alignItems = 'center';
-
-             el.innerHTML = `
-                <span>Mock Room ${index+1} (Mode: ${room.modeIndex === 2 ? '6/40' : 'Unknown'}) | Players: ${room.players.length}/10</span>
-                <button onclick="Multiplayer.joinRoom('${room.id}')">Join</button>
-            `;
-            this.roomList.appendChild(el);
+        rooms.forEach((room) => {
+             this.renderRoomItem(room, room.id);
         });
     },
 
@@ -163,55 +209,43 @@ const Multiplayer = {
 
         docs.forEach(doc => {
             const room = doc.data();
-            const el = document.createElement('div');
-            el.className = 'room-item';
-            el.style.border = '1px solid #ccc';
-            el.style.padding = '10px';
-            el.style.margin = '5px 0';
-            el.style.display = 'flex';
-            el.style.justifyContent = 'space-between';
-            el.style.alignItems = 'center';
-
-            el.innerHTML = `
-                <span>Mode: ${room.modeIndex === 2 ? '6/40' : 'Unknown'} | Players: ${room.players ? room.players.length : 0}/10</span>
-                <button onclick="Multiplayer.joinRoom('${doc.id}')">Join</button>
-            `;
-            this.roomList.appendChild(el);
+            this.renderRoomItem(room, doc.id);
         });
     },
 
-    handleCreateRoom: async function() {
-        if (!Auth.currentUser) return;
+    renderRoomItem: function(room, id) {
+        const el = document.createElement('div');
+        el.className = 'room-item';
+        el.style.border = '1px solid #ccc';
+        el.style.padding = '10px';
+        el.style.margin = '5px 0';
+        el.style.display = 'flex';
+        el.style.justifyContent = 'space-between';
+        el.style.alignItems = 'center';
+        el.style.background = '#fff';
+        el.style.borderRadius = '10px';
 
-        if (Config.isMock) {
-            const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
-            rooms.push({
-                id: 'mock_room_' + Date.now(),
-                host: Auth.currentUser.uid,
-                status: 'waiting',
-                createdAt: Date.now(),
-                players: [Auth.currentUser.uid],
-                modeIndex: 2
-            });
-            localStorage.setItem('lotgo_mock_rooms', JSON.stringify(rooms));
-            this.renderMockRooms(rooms);
-            return;
+        const modeName = this.getModeName(room.modeIndex);
+        const revealName = room.revealType === 'auto' ? 'Auto (2s)' : 'Manual (5s)';
+
+        el.innerHTML = `
+            <div style="flex: 1;">
+                <div style="font-weight:bold; font-size:1.1rem; color:#d35400;">${room.title || 'Untitled Room'}</div>
+                <div style="font-size:0.9rem; color:#7f8c8d;">
+                    ${modeName} • ${revealName} • ${room.players.length}/${room.maxPlayers || 10} Players
+                </div>
+            </div>
+            <button onclick="Multiplayer.joinRoom('${id}')">Join</button>
+        `;
+        this.roomList.appendChild(el);
+    },
+
+    getModeName: function(index) {
+        // Fallback if Game isn't loaded, though it should be
+        if (window.Game && Game.MODES[index]) {
+            return Game.MODES[index].name;
         }
-
-        if (!Config.db) return;
-
-        try {
-            await Config.db.collection('rooms').add({
-                host: Auth.currentUser.uid,
-                status: 'waiting',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                players: [Auth.currentUser.uid],
-                modeIndex: 2 // Restricted to Mode 2 (6/40) as per memory
-            });
-        } catch (e) {
-            console.error("Error creating room:", e);
-            this.errorDisplay.textContent = e.message;
-        }
+        return `Mode ${index}`;
     },
 
     joinRoom: function(roomId) {
@@ -223,7 +257,7 @@ const Multiplayer = {
             if (!room) { alert("Room not found"); return; }
 
             if (!room.players.includes(Auth.currentUser.uid)) {
-                if (room.players.length >= 10) { alert("Room full"); return; }
+                if (room.players.length >= (room.maxPlayers || 10)) { alert("Room full"); return; }
                 room.players.push(Auth.currentUser.uid);
                 localStorage.setItem('lotgo_mock_rooms', JSON.stringify(rooms));
                 this.renderMockRooms(rooms);
@@ -236,7 +270,6 @@ const Multiplayer = {
 
         if (!Config.db) return;
 
-        // Transaction to join room
         const roomRef = Config.db.collection('rooms').doc(roomId);
         const uid = Auth.currentUser.uid;
 
@@ -245,8 +278,8 @@ const Multiplayer = {
             if (!roomDoc.exists) throw "Room does not exist!";
 
             const data = roomDoc.data();
-            if (data.players.includes(uid)) return; // Already joined
-            if (data.players.length >= 10) throw "Room is full!";
+            if (data.players.includes(uid)) return;
+            if (data.players.length >= (data.maxPlayers || 10)) throw "Room is full!";
 
             transaction.update(roomRef, {
                 players: firebase.firestore.FieldValue.arrayUnion(uid)
