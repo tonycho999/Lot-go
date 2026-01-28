@@ -13,10 +13,19 @@ const firebaseConfig = {
 const Config = {
     db: null,
     auth: null,
+    isMock: false,
 
     init: function() {
+        // Check if config is still default placeholder
+        if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+            console.warn("Firebase Config is using placeholders. Switching to Mock Mode.");
+            this.isMock = true;
+            return;
+        }
+
         if (typeof firebase === 'undefined') {
             console.error("Firebase SDK not loaded.");
+            this.isMock = true;
             return;
         }
 
@@ -27,9 +36,7 @@ const Config = {
             console.log("Firebase Initialized Successfully");
         } catch (error) {
             console.error("Firebase Initialization Failed:", error);
-            if (error.code === 'app/no-app' || error.message.includes('valid config')) {
-                alert("Firebase configuration is missing or invalid. Please check the console and js/firebase-config.js.");
-            }
+            this.isMock = true;
         }
     }
 };

@@ -338,6 +338,8 @@ const App = {
     }
 };
 
+window.App = App;
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     App.init();

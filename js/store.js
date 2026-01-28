@@ -9,6 +9,24 @@ const Store = {
      */
     initUser: async function(user) {
         if (!user) return;
+
+        if (Config.isMock) {
+            console.log("Store: Initializing Mock User");
+            const key = `lotgo_mock_data_${user.uid}`;
+            let data = localStorage.getItem(key);
+            if (!data) {
+                data = {
+                    username: user.email ? user.email.split('@')[0] : 'User',
+                    email: user.email,
+                    gold: 1000,
+                    createdAt: Date.now()
+                };
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+            this.subscribeToUser(user.uid);
+            return;
+        }
+
         const db = Config.db;
         if (!db) return;
 
@@ -37,6 +55,32 @@ const Store = {
     subscribeToUser: function(uid) {
         if (this.unsubscribe) {
             this.unsubscribe();
+            this.unsubscribe = null;
+        }
+
+        if (Config.isMock) {
+            const updateFromStorage = () => {
+                const key = `lotgo_mock_data_${uid}`;
+                const dataStr = localStorage.getItem(key);
+                if (dataStr) {
+                    const data = JSON.parse(dataStr);
+                    if (window.Game) {
+                        Game.state.gold = data.gold !== undefined ? data.gold : 0;
+                    }
+                    if (window.App && App.updateGoldDisplays) {
+                        App.updateGoldDisplays();
+                    }
+                }
+            };
+
+            // Initial call
+            updateFromStorage();
+
+            // Mock listener (polling or custom event)
+            // Since we are the only ones updating it in this session, we can just update explicitly.
+            // But to simulate "subscription", we can set an interval or hook into updateGold.
+            // For simplicity, updateGold will trigger the "listener" logic if mock.
+            return;
         }
 
         const db = Config.db;
@@ -72,6 +116,18 @@ const Store = {
      * @returns {Promise<void>}
      */
     updateGold: async function(uid, amount) {
+        if (Config.isMock) {
+            const key = `lotgo_mock_data_${uid}`;
+            let data = JSON.parse(localStorage.getItem(key) || '{}');
+            data.gold = (data.gold || 0) + amount;
+            localStorage.setItem(key, JSON.stringify(data));
+
+            // Simulate real-time update
+            if (window.Game) Game.state.gold = data.gold;
+            if (window.App && App.updateGoldDisplays) App.updateGoldDisplays();
+            return;
+        }
+
         const db = Config.db;
         if (!db) return;
 
@@ -88,3 +144,5 @@ const Store = {
         }
     }
 };
+
+window.Store = Store;

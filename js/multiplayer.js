@@ -89,6 +89,18 @@ const Multiplayer = {
     },
 
     fetchRooms: function() {
+        if (Config.isMock) {
+             this.errorDisplay.textContent = "Mock Mode: Using local storage for rooms.";
+             this.errorDisplay.style.color = 'orange';
+
+             // Initial load
+             const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
+             this.renderMockRooms(rooms);
+
+             // Poll for changes? Or just static for now since single user.
+             return;
+        }
+
         if (!Config.db) {
             this.errorDisplay.textContent = "Database connection not available.";
             return;
@@ -118,6 +130,30 @@ const Multiplayer = {
             });
     },
 
+    renderMockRooms: function(rooms) {
+        this.roomList.innerHTML = '';
+        if (rooms.length === 0) {
+            this.roomList.innerHTML = '<p>No active rooms. Create one (Mock)!</p>';
+            return;
+        }
+        rooms.forEach((room, index) => {
+             const el = document.createElement('div');
+             el.className = 'room-item';
+             el.style.border = '1px solid #ccc';
+             el.style.padding = '10px';
+             el.style.margin = '5px 0';
+             el.style.display = 'flex';
+             el.style.justifyContent = 'space-between';
+             el.style.alignItems = 'center';
+
+             el.innerHTML = `
+                <span>Mock Room ${index+1} (Mode: ${room.modeIndex === 2 ? '6/40' : 'Unknown'}) | Players: ${room.players.length}/10</span>
+                <button onclick="Multiplayer.joinRoom('${room.id}')">Join</button>
+            `;
+            this.roomList.appendChild(el);
+        });
+    },
+
     renderRooms: function(docs) {
         this.roomList.innerHTML = '';
         if (docs.length === 0) {
@@ -145,8 +181,24 @@ const Multiplayer = {
     },
 
     handleCreateRoom: async function() {
-        if (!Config.db) return;
         if (!Auth.currentUser) return;
+
+        if (Config.isMock) {
+            const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
+            rooms.push({
+                id: 'mock_room_' + Date.now(),
+                host: Auth.currentUser.uid,
+                status: 'waiting',
+                createdAt: Date.now(),
+                players: [Auth.currentUser.uid],
+                modeIndex: 2
+            });
+            localStorage.setItem('lotgo_mock_rooms', JSON.stringify(rooms));
+            this.renderMockRooms(rooms);
+            return;
+        }
+
+        if (!Config.db) return;
 
         try {
             await Config.db.collection('rooms').add({
@@ -156,7 +208,6 @@ const Multiplayer = {
                 players: [Auth.currentUser.uid],
                 modeIndex: 2 // Restricted to Mode 2 (6/40) as per memory
             });
-            // Don't need to alert, the list will update
         } catch (e) {
             console.error("Error creating room:", e);
             this.errorDisplay.textContent = e.message;
@@ -164,7 +215,26 @@ const Multiplayer = {
     },
 
     joinRoom: function(roomId) {
-        if (!Config.db || !Auth.currentUser) return;
+        if (!Auth.currentUser) return;
+
+        if (Config.isMock) {
+            const rooms = JSON.parse(localStorage.getItem('lotgo_mock_rooms') || '[]');
+            const room = rooms.find(r => r.id === roomId);
+            if (!room) { alert("Room not found"); return; }
+
+            if (!room.players.includes(Auth.currentUser.uid)) {
+                if (room.players.length >= 10) { alert("Room full"); return; }
+                room.players.push(Auth.currentUser.uid);
+                localStorage.setItem('lotgo_mock_rooms', JSON.stringify(rooms));
+                this.renderMockRooms(rooms);
+                alert("Joined Mock Room!");
+            } else {
+                alert("Already in room");
+            }
+            return;
+        }
+
+        if (!Config.db) return;
 
         // Transaction to join room
         const roomRef = Config.db.collection('rooms').doc(roomId);
@@ -183,12 +253,13 @@ const Multiplayer = {
             });
         }).then(() => {
             alert("Joined Room!");
-            // Logic to enter game lobby would go here
         }).catch((e) => {
             alert("Failed to join: " + e);
         });
     }
 };
+
+window.Multiplayer = Multiplayer;
 
 document.addEventListener('DOMContentLoaded', () => {
     Multiplayer.init();
