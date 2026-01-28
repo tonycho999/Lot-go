@@ -17,12 +17,17 @@ const App = {
         // Initialize Auth Listener
         Auth.init(async (user) => {
             if (user) {
+                // Initialize user first to ensure doc exists
                 await UserStore.initUser(user);
 
                 // Sync Game Gold with Cloud Gold
                 UserStore.subscribeToUser(user.uid, (userData) => {
-                    Game.state.gold = userData.gold;
-                    this.updateGoldDisplays();
+                    // This is the SINGLE SOURCE OF TRUTH for gold
+                    // Do not let local game state overwrite this unexpectedly
+                    if (userData) {
+                        Game.state.gold = userData.gold;
+                        this.updateGoldDisplays();
+                    }
                 });
 
                 this.showLobby();
@@ -624,9 +629,13 @@ const App = {
 
         // Grid Class
         this.cardsGrid.className = 'grid-container';
+        // Note: modeIndex comes from Firestore room data.
+        // 0 = 2/4, 1 = 4/10, 2 = 6/40.
+        // Multiplayer is restricted to mode 2 (6/40) mostly, but we support others if created.
         const modeId = room.modeIndex;
-        if (modeId === 1) this.cardsGrid.classList.add('grid-5x2'); // 4/10 is index 1
-        else if (modeId === 2) this.cardsGrid.classList.add('grid-8x5'); // 6/40 is index 2
+        if (modeId === 0) this.cardsGrid.classList.add('grid-1x4');
+        else if (modeId === 1) this.cardsGrid.classList.add('grid-5x2');
+        else if (modeId === 2) this.cardsGrid.classList.add('grid-8x5');
 
         room.deck.forEach((card, index) => {
             const cardEl = document.createElement('div');
