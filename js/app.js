@@ -4,19 +4,21 @@ const App = {
     init: function() {
         this.cacheDOM();
         this.bindEvents();
-        this.checkAuth();
+        // checkAuth is handled by Auth.init listener
     },
 
     cacheDOM: function() {
         this.screens = {
             login: document.getElementById('login-screen'),
             lobby: document.getElementById('lobby-screen'),
-            game: document.getElementById('game-screen')
+            game: document.getElementById('game-screen'),
+            multiplayer: document.getElementById('multiplayer-screen')
         };
 
         // Login
         this.loginBtn = document.getElementById('login-btn');
-        this.usernameInput = document.getElementById('username');
+        this.registerBtn = document.getElementById('register-btn');
+        this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
         this.loginError = document.getElementById('login-error');
 
@@ -24,6 +26,7 @@ const App = {
         this.userGoldDisplay = document.getElementById('user-gold');
         this.modeButtons = document.querySelectorAll('.mode-btn');
         this.watchAdBtn = document.getElementById('watch-ad-btn');
+        this.multiplayerBtn = document.getElementById('multiplayer-btn');
 
         // Ad Modal
         this.adModal = document.getElementById('ad-modal');
@@ -56,6 +59,9 @@ const App = {
 
     bindEvents: function() {
         this.loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        if (this.registerBtn) {
+            this.registerBtn.addEventListener('click', this.handleRegister.bind(this));
+        }
 
         this.modeButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -65,6 +71,12 @@ const App = {
         });
 
         this.watchAdBtn.addEventListener('click', this.handleWatchAd.bind(this));
+        if (this.multiplayerBtn) {
+            this.multiplayerBtn.addEventListener('click', () => {
+                this.showScreen('multiplayer');
+                if (window.Multiplayer) Multiplayer.showLobby();
+            });
+        }
         this.backToLobbyBtn.addEventListener('click', this.showLobby.bind(this));
         this.startGameBtn.addEventListener('click', this.handleStartGame.bind(this));
 
@@ -72,14 +84,6 @@ const App = {
         this.cardsGrid.addEventListener('click', this.handleCardClick.bind(this));
 
         this.collectBtn.addEventListener('click', this.showLobby.bind(this));
-    },
-
-    checkAuth: function() {
-        if (Auth.isLoggedIn()) {
-            this.showLobby();
-        } else {
-            this.showScreen('login');
-        }
     },
 
     showScreen: function(screenName) {
@@ -90,15 +94,28 @@ const App = {
         this.screens[screenName].classList.add('active');
     },
 
-    handleLogin: function() {
-        const username = this.usernameInput.value;
+    handleLogin: async function() {
+        const email = this.emailInput.value;
         const password = this.passwordInput.value;
 
-        if (Auth.login(username, password)) {
-            this.showLobby();
+        const result = await Auth.login(email, password);
+        if (result.success) {
             this.loginError.textContent = '';
         } else {
-            this.loginError.textContent = 'Invalid credentials';
+            this.loginError.textContent = 'Login Failed: ' + result.message;
+        }
+    },
+
+    handleRegister: async function() {
+        const email = this.emailInput.value;
+        const password = this.passwordInput.value;
+
+        const result = await Auth.register(email, password);
+        if (result.success) {
+            this.loginError.textContent = '';
+            alert("Account created!");
+        } else {
+            this.loginError.textContent = 'Register Failed: ' + result.message;
         }
     },
 
@@ -144,6 +161,10 @@ const App = {
     finishAd: function() {
         this.adModal.classList.add('hidden');
         Game.addGold(200);
+        // Sync with Store if logged in
+        if (Auth.currentUser && window.Store) {
+             Store.updateGold(Auth.currentUser.uid, 200);
+        }
         this.updateGoldDisplays();
         alert("You earned 200 Gold!");
     },
@@ -210,7 +231,24 @@ const App = {
         }
 
         try {
+            // Deduct gold in Store first?
+            // Memory says: "Single Player game cost is deducted from Cloud Gold only after local game initialization succeeds"
+            // So we call Game.startGame (which updates local state) then Store.update
+
+            // Check cost first locally
+            const mode = Game.MODES[Game.state.currentModeIndex];
+            if (Game.state.gold < mode.cost) {
+                this.setupError.textContent = "Not enough gold!";
+                return;
+            }
+
             Game.startGame(selected);
+
+            // Sync deduction with Store
+            if (Auth.currentUser && window.Store) {
+                Store.updateGold(Auth.currentUser.uid, -mode.cost);
+            }
+
             this.updateGoldDisplays();
 
             this.renderBoard();
@@ -274,6 +312,11 @@ const App = {
         if (result.gameOver) {
             if (result.win) {
                 this.resultMessage.textContent = `You Won ${result.prize.toLocaleString()} Gold!`;
+
+                // Sync Win with Store
+                if (Auth.currentUser && window.Store) {
+                    Store.updateGold(Auth.currentUser.uid, result.prize);
+                }
             } else {
                 this.resultMessage.textContent = 'Game Over';
             }

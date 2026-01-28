@@ -1,32 +1,58 @@
 // js/auth.js
 
 const Auth = {
-    CREDENTIALS: {
-        username: 'admin',
-        password: '999999'
+    currentUser: null,
+
+    init: function() {
+        if (!Config.auth) return;
+
+        Config.auth.onAuthStateChanged(user => {
+            this.currentUser = user;
+            if (user) {
+                console.log("User logged in:", user.email);
+                if (window.Store) Store.initUser(user);
+                if (window.App) App.showLobby();
+            } else {
+                console.log("User logged out");
+                if (window.App) App.showScreen('login');
+            }
+        });
     },
 
-    /**
-     * Verifies the username and password.
-     * @param {string} username
-     * @param {string} password
-     * @returns {boolean}
-     */
-    login: function(username, password) {
-        if (username === this.CREDENTIALS.username && password === this.CREDENTIALS.password) {
-            console.log("Login Successful");
-            localStorage.setItem('lotgo_user', username);
-            return true;
+    login: async function(email, password) {
+        if (!Config.auth) return { success: false, message: "Firebase not initialized" };
+        try {
+            await Config.auth.signInWithEmailAndPassword(email, password);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
         }
-        console.log("Login Failed");
-        return false;
     },
 
-    logout: function() {
-        localStorage.removeItem('lotgo_user');
+    register: async function(email, password) {
+        if (!Config.auth) return { success: false, message: "Firebase not initialized" };
+        try {
+            await Config.auth.createUserWithEmailAndPassword(email, password);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    },
+
+    logout: async function() {
+        if (!Config.auth) return;
+        try {
+            await Config.auth.signOut();
+            if (window.Store) Store.unsubscribe && Store.unsubscribe();
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     },
 
     isLoggedIn: function() {
-        return localStorage.getItem('lotgo_user') === this.CREDENTIALS.username;
+        return !!this.currentUser;
     }
 };
+
+// Initialize listener
+Auth.init();

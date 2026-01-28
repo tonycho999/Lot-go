@@ -13,12 +13,15 @@
         <section id="login-screen" class="screen active">
             <h1>Login to Lot-Go</h1>
             <div class="form-group">
-                <input type="text" id="username" placeholder="Username" value="admin">
+                <input type="email" id="email" placeholder="Email" value="tonycho999@gmail.com">
             </div>
             <div class="form-group">
                 <input type="password" id="password" placeholder="Password" value="">
             </div>
-            <button id="login-btn">Login</button>
+            <div class="auth-buttons">
+                <button id="login-btn">Login</button>
+                <button id="register-btn" class="secondary-btn" style="background-color: #666;">Create Account</button>
+            </div>
             <p id="login-error" class="error"></p>
         </section>
 
@@ -31,6 +34,9 @@
 
             <button id="watch-ad-btn" class="ad-btn">
                 📺 Watch Ad (+200 Gold)
+            </button>
+            <button id="multiplayer-btn" class="secondary-btn" style="margin-top: 10px; width: 100%;">
+                👥 Multiplayer Lobby
             </button>
 
             <h2>Select Game Mode</h2>
@@ -50,6 +56,38 @@
                     <p>Cost: 500 Gold</p>
                     <p>Max Prize: 1,000,000,000</p>
                 </button>
+            </div>
+        </section>
+
+        <!-- Multiplayer Screen -->
+        <section id="multiplayer-screen" class="screen hidden">
+            <div class="mp-header">
+                <button id="mp-back-btn">Back</button>
+                <h1>Multiplayer</h1>
+                <span id="mp-gold-display">Gold: 0</span>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="mp-games">Games</button>
+                <button class="tab-btn" data-tab="mp-profile">Profile</button>
+            </div>
+
+            <div id="mp-games" class="tab-content active">
+                <div class="room-controls">
+                    <button id="create-room-btn">Create Room</button>
+                </div>
+                <div id="room-list" class="room-list">
+                    <!-- Rooms will be injected here -->
+                    <p>Loading rooms...</p>
+                </div>
+                <div id="mp-error" class="error"></div>
+            </div>
+
+            <div id="mp-profile" class="tab-content hidden">
+                <h2>User Profile</h2>
+                <p>Username: <span id="profile-username"></span></p>
+                <p>Email: <span id="profile-email"></span></p>
+                <button id="mp-logout-btn" class="secondary-btn">Sign Out</button>
             </div>
         </section>
 
@@ -99,6 +137,14 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/multiplayer.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/game.js"></script>
     <script src="js/app.js"></script>
