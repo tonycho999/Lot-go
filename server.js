@@ -75,8 +75,8 @@ io.on('connection', (socket) => {
         const sender = users[socket.id];
         const amount = parseInt(data.amount);
 
-        if (isNaN(amount) || amount <= 0) {
-            socket.emit('error_message', 'Invalid amount');
+        if (isNaN(amount) || amount < 100000) {
+            socket.emit('error_message', 'Minimum gift amount is 100,000');
             return;
         }
 

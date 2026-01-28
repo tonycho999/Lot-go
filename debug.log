@@ -1,0 +1,42 @@
+Connected: 7vto3BMAKq9zVV4PAAAP
+Login Success: {
+  user: {
+    id: '7vto3BMAKq9zVV4PAAAP',
+    username: 'tester',
+    gold: 10000,
+    room: null
+  }
+}
+Received Chat: {
+  sender: 'tester',
+  text: 'Hello World',
+  timestamp: 1769602869014,
+  scope: 'global'
+}
+Room Joined: {
+  id: 'room_4',
+  hostId: '7vto3BMAKq9zVV4PAAAP',
+  players: [
+    {
+      id: '7vto3BMAKq9zVV4PAAAP',
+      username: 'tester',
+      ready: true,
+      selectedNumbers: []
+    }
+  ],
+  settings: { modeType: 'auto', cardMode: 2 },
+  gameState: null,
+  chat: []
+}
+Room List Updated: 1
+Room List Updated: 0
+Room List Updated: 1
+Room List Updated: 0
+Received Chat: {
+  sender: 'admin',
+  text: 'Hello Test Chat',
+  timestamp: 1769603000535,
+  scope: 'global'
+}
+Room List Updated: 1
+Room List Updated: 0

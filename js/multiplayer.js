@@ -57,12 +57,17 @@ const Multiplayer = {
     },
 
     bindEvents: function() {
-        this.chatSendBtn.addEventListener('click', () => this.sendChat('global'));
+        console.log("Multiplayer bindEvents called");
+        this.chatSendBtn.addEventListener('click', () => {
+            console.log("Chat Send Clicked");
+            this.sendChat('global');
+        });
         this.chatInput.addEventListener('keypress', (e) => {
             if(e.key === 'Enter') this.sendChat('global');
         });
 
         this.createRoomBtn.addEventListener('click', () => {
+            console.log("Create Room Btn Clicked");
             this.createRoomModal.classList.remove('hidden');
         });
 
@@ -71,12 +76,14 @@ const Multiplayer = {
         });
 
         this.confirmCreateRoomBtn.addEventListener('click', () => {
+            console.log("Confirm Create Room Clicked");
             const modeType = this.roomModeTypeSelect.value;
             this.socket.emit('create_room', { modeType });
             this.createRoomModal.classList.add('hidden');
         });
 
         this.joinRoomBtn.addEventListener('click', () => {
+            console.log("Join Room Btn Clicked");
             this.socket.emit('get_rooms');
             this.showScreen('roomList');
         });
