@@ -64,22 +64,11 @@ const Store = {
                 const dataStr = localStorage.getItem(key);
                 if (dataStr) {
                     const data = JSON.parse(dataStr);
-                    if (window.Game) {
-                        Game.state.gold = data.gold !== undefined ? data.gold : 0;
-                    }
-                    if (window.App && App.updateGoldDisplays) {
-                        App.updateGoldDisplays();
-                    }
+                    this.syncGameState(data);
                 }
             };
-
             // Initial call
             updateFromStorage();
-
-            // Mock listener (polling or custom event)
-            // Since we are the only ones updating it in this session, we can just update explicitly.
-            // But to simulate "subscription", we can set an interval or hook into updateGold.
-            // For simplicity, updateGold will trigger the "listener" logic if mock.
             return;
         }
 
@@ -90,23 +79,29 @@ const Store = {
             .onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
-                    // Update Game State
-                    if (window.Game) {
-                        Game.state.gold = data.gold !== undefined ? data.gold : 0;
-                    }
-                    // Notify App to update UI if needed
-                    if (window.App && App.updateGoldDisplays) {
-                        App.updateGoldDisplays();
-                    }
-
-                    // Admin capability check (hardcoded in memory)
-                    if (window.App && App.checkAdmin) {
-                        App.checkAdmin(data.email);
-                    }
+                    this.syncGameState(data);
                 }
             }, (error) => {
                 console.error("Error listening to user data:", error);
             });
+    },
+
+    syncGameState: function(data) {
+        if (window.Game) {
+            // Force Game state to match Cloud/Store state
+            // This overwrites any local optimistic drift
+            const serverGold = data.gold !== undefined ? data.gold : 0;
+            if (Game.state.gold !== serverGold) {
+                console.log(`Syncing Gold: Local(${Game.state.gold}) -> Server(${serverGold})`);
+                Game.state.gold = serverGold;
+            }
+        }
+        if (window.App && App.updateGoldDisplays) {
+            App.updateGoldDisplays();
+        }
+        if (window.App && App.checkAdmin) {
+            App.checkAdmin(data.email);
+        }
     },
 
     /**
@@ -122,9 +117,8 @@ const Store = {
             data.gold = (data.gold || 0) + amount;
             localStorage.setItem(key, JSON.stringify(data));
 
-            // Simulate real-time update
-            if (window.Game) Game.state.gold = data.gold;
-            if (window.App && App.updateGoldDisplays) App.updateGoldDisplays();
+            // Trigger sync
+            this.syncGameState(data);
             return;
         }
 

@@ -45,6 +45,7 @@ const Game = {
     },
 
     addGold: function(amount) {
+        // Optimistic update, but source of truth is Store
         this.state.gold += amount;
     },
 
@@ -83,7 +84,7 @@ const Game = {
             throw new Error(`Numbers must be between 1 and ${mode.maxNumber}.`);
         }
 
-        // Deduct Gold
+        // Deduct Gold (Optimistic)
         this.state.gold -= mode.cost;
         this.state.targetNumbers = selectedNumbers;
 
