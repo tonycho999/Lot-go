@@ -748,7 +748,7 @@ const App = {
             const cost = Game.MODES[Game.state.currentModeIndex].cost;
             UserStore.updateGold(Auth.user.uid, -cost).catch(e => {
                 console.error("Failed to sync cost:", e);
-                // In a real app we might revert local state here
+                alert("Warning: Could not save game cost to cloud. Check connection.");
             });
 
             // this.updateGoldDisplays(); // Listener handles this now

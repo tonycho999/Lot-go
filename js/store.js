@@ -64,13 +64,15 @@ const UserStore = {
     updateGold: async function(uid, amount) {
         try {
             const userRef = doc(db, "users", uid);
-            await updateDoc(userRef, {
+            // Use setDoc with merge: true to create doc if missing (robustness)
+            await setDoc(userRef, {
                 gold: increment(amount)
-            });
+            }, { merge: true });
             console.log(`Updated gold for ${uid}: ${amount}`);
         } catch (e) {
             console.error("Failed to update gold:", e);
-            throw e; // Re-throw to handle in caller if needed
+            alert(`Error saving progress: ${e.message}`);
+            throw e;
         }
     },
 
