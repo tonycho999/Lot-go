@@ -357,12 +357,42 @@ const Multiplayer = {
                     winner: {
                         uid: auth.currentUser.uid,
                         name: auth.currentUser.email.split('@')[0],
-                        prize: prize
+                        prize: prize,
+                        claimed: false // Flag to track if money was transferred
                     }
                 });
             });
         } catch (e) {
             console.error(e);
+        }
+    },
+
+    claimWinnings: async function(roomId) {
+        if (!roomId || !auth.currentUser) return;
+        const roomRef = doc(db, "rooms", roomId);
+        const userRef = doc(db, "users", auth.currentUser.uid);
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const roomDoc = await transaction.get(roomRef);
+                if (!roomDoc.exists()) throw new Error("Room missing");
+
+                const data = roomDoc.data();
+                if (data.status !== 'finished') throw new Error("Game not finished");
+                if (data.winner.uid !== auth.currentUser.uid) throw new Error("Not winner");
+                if (data.winner.claimed) throw new Error("Already claimed");
+
+                // Transfer Gold
+                transaction.update(userRef, { gold: increment(data.winner.prize) });
+
+                // Mark Claimed
+                transaction.update(roomRef, { "winner.claimed": true });
+            });
+            console.log("Winnings claimed successfully");
+        } catch (e) {
+            console.error("Claim Winnings Failed:", e);
+            if (e.message === "Already claimed") return; // Ignore harmless double-claims
+            throw e;
         }
     },
 

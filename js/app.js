@@ -700,8 +700,11 @@ const App = {
 
         if (room.winner.uid === Auth.user.uid) {
             // I won
-            // Game.addGold(room.winner.prize); // Local only, deprecated
-            UserStore.updateGold(Auth.user.uid, room.winner.prize); // Persist to Cloud
+            Multiplayer.claimWinnings(room.id).then(() => {
+                // Success
+            }).catch(e => {
+                console.error("Failed to claim winnings:", e);
+            });
             this.resultMessage.textContent += " - YOU WON!";
         } else {
              this.resultMessage.textContent += " - You lost.";
@@ -738,13 +741,16 @@ const App = {
 
         // Single Player Logic (Existing)
         try {
-            // Deduct Gold from Cloud before starting game locally
-            const cost = Game.MODES[Game.state.currentModeIndex].cost;
-            // Since Game.startGame deducts locally, we also need to deduct remotely
-            // Optimally we'd do this transactionally but for now:
-            UserStore.updateGold(Auth.user.uid, -cost);
-
             Game.startGame(selected);
+
+            // Deduct Gold from Cloud AFTER local validation passes
+            // This prevents deducting gold if Game.startGame throws (invalid inputs)
+            const cost = Game.MODES[Game.state.currentModeIndex].cost;
+            UserStore.updateGold(Auth.user.uid, -cost).catch(e => {
+                console.error("Failed to sync cost:", e);
+                // In a real app we might revert local state here
+            });
+
             // this.updateGoldDisplays(); // Listener handles this now
 
             this.renderBoard();
@@ -794,7 +800,9 @@ const App = {
             if (result.win) {
                 this.resultMessage.textContent = `You Won ${result.prize.toLocaleString()} Gold!`;
                 // Add Prize to Cloud
-                UserStore.updateGold(Auth.user.uid, result.prize);
+                UserStore.updateGold(Auth.user.uid, result.prize).catch(e => {
+                    alert("Failed to save win: " + e.message);
+                });
             } else {
                 this.resultMessage.textContent = 'Game Over';
             }

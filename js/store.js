@@ -62,10 +62,16 @@ const UserStore = {
 
     // Update Gold (Game Logic)
     updateGold: async function(uid, amount) {
-        const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, {
-            gold: increment(amount)
-        });
+        try {
+            const userRef = doc(db, "users", uid);
+            await updateDoc(userRef, {
+                gold: increment(amount)
+            });
+            console.log(`Updated gold for ${uid}: ${amount}`);
+        } catch (e) {
+            console.error("Failed to update gold:", e);
+            throw e; // Re-throw to handle in caller if needed
+        }
     },
 
     // Gifting Logic
