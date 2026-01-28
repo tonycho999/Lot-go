@@ -1,8 +1,8 @@
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/firebase-config.js HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/multiplayer.js HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/store.js HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/game.js HTTP/1.1" 200 -
-127.0.0.1 - - [28/Jan/2026 03:10:55] "GET /js/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/firebase-config.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/store.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/multiplayer.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/game.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Jan/2026 03:42:33] "GET /js/app.js HTTP/1.1" 200 -

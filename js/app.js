@@ -12,7 +12,8 @@ const App = {
             login: document.getElementById('login-screen'),
             lobby: document.getElementById('lobby-screen'),
             game: document.getElementById('game-screen'),
-            multiplayer: document.getElementById('multiplayer-screen')
+            multiplayer: document.getElementById('multiplayer-screen'),
+            roomLobby: document.getElementById('room-lobby-screen')
         };
 
         // Login

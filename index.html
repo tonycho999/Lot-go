@@ -148,14 +148,6 @@
                     <input type="number" id="room-max-players" min="2" max="10" value="10">
                 </div>
                 <div class="form-group">
-                    <label style="display:block; margin-bottom:5px; color:#4a4036;">Card Mode:</label>
-                    <select id="room-card-mode" style="width: 80%; padding: 10px; border-radius: 50px; border: 1px solid #e0e0e0;">
-                        <option value="0">2 / 4 Cards</option>
-                        <option value="1">4 / 10 Cards</option>
-                        <option value="2" selected>6 / 40 Cards</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label style="display:block; margin-bottom:5px; color:#4a4036;">Reveal Type:</label>
                     <select id="room-reveal-type" style="width: 80%; padding: 10px; border-radius: 50px; border: 1px solid #e0e0e0;">
                         <option value="auto">Auto (Server 2s)</option>
@@ -168,6 +160,28 @@
                 </div>
             </div>
         </div>
+
+        <!-- Room Lobby Screen (Inside a Room) -->
+        <section id="room-lobby-screen" class="screen hidden">
+            <div class="mp-header">
+                <button id="leave-room-btn" class="secondary-btn" style="background-color: #e74c3c;">Leave</button>
+                <h1 id="lobby-room-title">Room Title</h1>
+                <span>Waiting for players...</span>
+            </div>
+
+            <div class="player-list-container">
+                <h3>Players (<span id="player-count">0/0</span>)</h3>
+                <div id="lobby-player-list" class="room-list">
+                    <!-- Players injected here -->
+                </div>
+            </div>
+
+            <div class="room-actions" style="margin-top: 20px; text-align: center;">
+                <button id="mp-ready-btn" class="hidden">OK (Ready)</button>
+                <button id="mp-start-btn" class="hidden" disabled>Start Game</button>
+                <p id="room-status-msg" style="margin-top: 10px; color: #7f8c8d;"></p>
+            </div>
+        </section>
     </div>
 
     <!-- Firebase SDKs (Compat) -->
