@@ -4,14 +4,19 @@ const App = {
     init: function() {
         this.cacheDOM();
         this.bindEvents();
+
+        // Init Multiplayer module
+        if (window.Multiplayer) {
+            Multiplayer.init();
+        }
+
         this.checkAuth();
     },
 
     cacheDOM: function() {
         this.screens = {
             login: document.getElementById('login-screen'),
-            lobby: document.getElementById('lobby-screen'),
-            game: document.getElementById('game-screen')
+            main: document.getElementById('main-app')
         };
 
         // Login
@@ -20,8 +25,16 @@ const App = {
         this.passwordInput = document.getElementById('password');
         this.loginError = document.getElementById('login-error');
 
-        // Lobby
-        this.userGoldDisplay = document.getElementById('user-gold');
+        // Nav
+        this.navTabs = document.querySelectorAll('.nav-tab');
+        this.tabPanes = document.querySelectorAll('.tab-pane');
+        this.logoutBtn = document.getElementById('logout-btn');
+        this.globalGoldDisplay = document.getElementById('global-gold-display');
+
+        // Single Player Lobby
+        this.singleLobby = document.getElementById('single-lobby');
+        this.singleGame = document.getElementById('single-game');
+
         this.modeButtons = document.querySelectorAll('.mode-btn');
         this.watchAdBtn = document.getElementById('watch-ad-btn');
 
@@ -30,33 +43,49 @@ const App = {
         this.adTimer = document.getElementById('ad-timer');
         this.adProgress = document.getElementById('ad-progress');
 
-        // Game
-        this.backToLobbyBtn = document.getElementById('back-to-lobby');
-        this.gameGoldDisplay = document.getElementById('game-gold-display');
-        this.currentPrizeDisplay = document.getElementById('current-prize-display');
-        this.gameTitle = document.getElementById('game-title');
+        // Single Game
+        this.singleBackBtn = document.getElementById('single-back-btn');
+        this.singlePrizeDisplay = document.getElementById('single-prize-display');
+        this.singleGameTitle = document.getElementById('single-game-title');
 
         // Phase 1
-        this.setupPhase = document.getElementById('setup-phase');
-        this.targetCountSpan = document.getElementById('target-count');
-        this.numberInputsContainer = document.getElementById('number-inputs');
-        this.setupError = document.getElementById('setup-error');
-        this.startGameBtn = document.getElementById('start-game-btn');
+        this.singleSetup = document.getElementById('single-setup');
+        this.targetCountSpan = document.getElementById('single-target-count');
+        this.maxNumSpan = document.getElementById('single-max-num');
+        this.numberInputsContainer = document.getElementById('single-inputs');
+        this.setupError = document.getElementById('single-setup-error');
+        this.startGameBtn = document.getElementById('single-start-btn');
 
         // Phase 2
-        this.playPhase = document.getElementById('play-phase');
-        this.gameStatus = document.getElementById('game-status');
-        this.cardsGrid = document.getElementById('cards-grid');
+        this.singlePlay = document.getElementById('single-play');
+        this.singleStatus = document.getElementById('single-status');
+        this.cardsGrid = document.getElementById('single-grid');
 
         // Result
-        this.gameResult = document.getElementById('game-result');
-        this.resultMessage = document.getElementById('result-message');
-        this.collectBtn = document.getElementById('collect-btn');
+        this.singleResult = document.getElementById('single-result');
+        this.resultMessage = document.getElementById('single-result-msg');
+        this.collectBtn = document.getElementById('single-collect-btn');
+
+        // Settings
+        this.newPasswordInput = document.getElementById('new-password');
+        this.changePasswordBtn = document.getElementById('change-password-btn');
+        this.giftUsernameInput = document.getElementById('gift-username');
+        this.giftAmountInput = document.getElementById('gift-amount');
+        this.giftGoldBtn = document.getElementById('gift-gold-btn');
     },
 
     bindEvents: function() {
         this.loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        this.logoutBtn.addEventListener('click', this.handleLogout.bind(this));
 
+        // Tabs
+        this.navTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                this.switchTab(e.target.dataset.tab);
+            });
+        });
+
+        // Single Player
         this.modeButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modeIndex = parseInt(btn.closest('.mode-btn').dataset.mode);
@@ -65,18 +94,22 @@ const App = {
         });
 
         this.watchAdBtn.addEventListener('click', this.handleWatchAd.bind(this));
-        this.backToLobbyBtn.addEventListener('click', this.showLobby.bind(this));
+        this.singleBackBtn.addEventListener('click', this.showSingleLobby.bind(this));
         this.startGameBtn.addEventListener('click', this.handleStartGame.bind(this));
-
-        // Card clicks are delegated to the grid
         this.cardsGrid.addEventListener('click', this.handleCardClick.bind(this));
+        this.collectBtn.addEventListener('click', this.showSingleLobby.bind(this));
 
-        this.collectBtn.addEventListener('click', this.showLobby.bind(this));
+        // Settings
+        this.changePasswordBtn.addEventListener('click', this.handleChangePassword.bind(this));
+        this.giftGoldBtn.addEventListener('click', this.handleGiftGold.bind(this));
     },
 
     checkAuth: function() {
         if (Auth.isLoggedIn()) {
-            this.showLobby();
+            this.showMainApp();
+            // Connect socket if not connected
+            const user = localStorage.getItem('lotgo_user');
+            if (user && Multiplayer) Multiplayer.connect(user);
         } else {
             this.showScreen('login');
         }
@@ -84,10 +117,12 @@ const App = {
 
     showScreen: function(screenName) {
         Object.values(this.screens).forEach(el => el.classList.add('hidden'));
-        Object.values(this.screens).forEach(el => el.classList.remove('active'));
-
         this.screens[screenName].classList.remove('hidden');
-        this.screens[screenName].classList.add('active');
+    },
+
+    showMainApp: function() {
+        this.showScreen('main');
+        this.updateGoldDisplays();
     },
 
     handleLogin: function() {
@@ -95,22 +130,42 @@ const App = {
         const password = this.passwordInput.value;
 
         if (Auth.login(username, password)) {
-            this.showLobby();
+            this.showMainApp();
+            if (Multiplayer) Multiplayer.connect(username);
             this.loginError.textContent = '';
         } else {
             this.loginError.textContent = 'Invalid credentials';
         }
     },
 
-    showLobby: function() {
-        this.updateGoldDisplays();
-        this.showScreen('lobby');
+    handleLogout: function() {
+        Auth.logout();
+        location.reload(); // Simple reload to reset state
+    },
+
+    switchTab: function(tabName) {
+        this.navTabs.forEach(t => {
+            if (t.dataset.tab === tabName) t.classList.add('active');
+            else t.classList.remove('active');
+        });
+
+        this.tabPanes.forEach(pane => {
+            if (pane.id === `${tabName}-tab`) pane.classList.add('active');
+            else pane.classList.remove('active');
+        });
     },
 
     updateGoldDisplays: function() {
         const gold = Game.state.gold;
-        this.userGoldDisplay.textContent = gold.toLocaleString();
-        this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
+        this.globalGoldDisplay.textContent = gold.toLocaleString();
+    },
+
+    // --- Single Player Logic ---
+
+    showSingleLobby: function() {
+        this.singleLobby.classList.remove('hidden');
+        this.singleGame.classList.add('hidden');
+        this.updateGoldDisplays();
     },
 
     handleWatchAd: function() {
@@ -154,20 +209,22 @@ const App = {
             this.updateGoldDisplays();
 
             const mode = Game.MODES[modeIndex];
-            this.gameTitle.textContent = mode.name;
+            this.singleGameTitle.textContent = mode.name;
             this.targetCountSpan.textContent = mode.targetCount;
+            this.maxNumSpan.textContent = mode.maxNumber;
 
             // Render Inputs
             this.renderNumberInputs(mode.targetCount, mode.maxNumber);
 
             // Show Setup Phase
-            this.setupPhase.classList.remove('hidden');
-            this.playPhase.classList.add('hidden');
-            this.gameResult.classList.add('hidden');
-            this.currentPrizeDisplay.classList.add('hidden');
-            this.setupError.textContent = '';
+            this.singleLobby.classList.add('hidden');
+            this.singleGame.classList.remove('hidden');
 
-            this.showScreen('game');
+            this.singleSetup.classList.remove('hidden');
+            this.singlePlay.classList.add('hidden');
+            this.singleResult.classList.add('hidden');
+            this.singlePrizeDisplay.classList.add('hidden');
+            this.setupError.textContent = '';
         } catch (e) {
             alert(e.message);
         }
@@ -209,17 +266,24 @@ const App = {
             return;
         }
 
+        // Range check
+        const mode = Game.MODES[Game.state.currentModeIndex];
+        if (selected.some(n => n < 1 || n > mode.maxNumber)) {
+             this.setupError.textContent = `Numbers must be between 1 and ${mode.maxNumber}.`;
+             return;
+        }
+
         try {
             Game.startGame(selected);
             this.updateGoldDisplays();
 
             this.renderBoard();
-            this.gameStatus.textContent = `Find ${Game.MODES[Game.state.currentModeIndex].targetCount} targets!`;
+            this.singleStatus.textContent = `Find ${mode.targetCount} targets!`;
             this.updatePrizeDisplay();
-            this.currentPrizeDisplay.classList.remove('hidden');
+            this.singlePrizeDisplay.classList.remove('hidden');
 
-            this.setupPhase.classList.add('hidden');
-            this.playPhase.classList.remove('hidden');
+            this.singleSetup.classList.add('hidden');
+            this.singlePlay.classList.remove('hidden');
         } catch (e) {
             this.setupError.textContent = e.message;
         }
@@ -227,7 +291,7 @@ const App = {
 
     updatePrizeDisplay: function() {
         const current = Game.getCurrentPrizeValue();
-        this.currentPrizeDisplay.textContent = `Next Prize: ${current.toLocaleString()}`;
+        this.singlePrizeDisplay.textContent = `Next Prize: ${current.toLocaleString()}`;
     },
 
     renderBoard: function() {
@@ -277,7 +341,7 @@ const App = {
             } else {
                 this.resultMessage.textContent = 'Game Over';
             }
-            this.gameResult.classList.remove('hidden');
+            this.singleResult.classList.remove('hidden');
             this.updateGoldDisplays();
         }
     },
@@ -291,6 +355,48 @@ const App = {
             back.classList.add('target');
         } else {
             back.classList.add('dud');
+        }
+    },
+
+    // --- Settings Logic ---
+    handleChangePassword: function() {
+        const newPass = this.newPasswordInput.value;
+        if (newPass.length < 4) {
+            alert("Password too short");
+            return;
+        }
+        // Since Auth is local storage based, we'll just mock this update for the current user.
+        // But Auth.CREDENTIALS is static in auth.js.
+        // We can't actually change the hardcoded 'admin' password without rewriting the file.
+        // However, we can simulate success.
+        alert("Password updated successfully (Mock)");
+        this.newPasswordInput.value = '';
+    },
+
+    handleGiftGold: function() {
+        const username = this.giftUsernameInput.value;
+        const amount = parseInt(this.giftAmountInput.value);
+
+        if (!username || !amount) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        if (amount < 100000) {
+            alert("Minimum gift amount is 100,000 Gold");
+            return;
+        }
+
+        if (Game.state.gold < amount) {
+            alert("Not enough gold");
+            return;
+        }
+
+        // Use Multiplayer socket to send gift if connected
+        if (Multiplayer && Multiplayer.socket) {
+            Multiplayer.giftGold(username, amount);
+        } else {
+            alert("Must be connected to server to gift gold.");
         }
     }
 };

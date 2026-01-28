@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lot-Go</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
@@ -22,68 +23,196 @@
             <p id="login-error" class="error"></p>
         </section>
 
-        <!-- Lobby Screen -->
-        <section id="lobby-screen" class="screen hidden">
-            <h1>Lot-Go Lobby</h1>
-            <div class="gold-display">
-                Your Gold: <span id="user-gold">0</span>
+        <!-- Main App (Tabs) -->
+        <div id="main-app" class="hidden">
+            <nav id="main-nav">
+                <button class="nav-tab active" data-tab="single">Single Game</button>
+                <button class="nav-tab" data-tab="multi">Multiplayer</button>
+                <button class="nav-tab" data-tab="settings">Settings</button>
+                <button id="logout-btn" class="nav-btn">Logout</button>
+            </nav>
+
+            <div class="gold-status-bar">
+                Gold: <span id="global-gold-display">0</span>
             </div>
 
-            <button id="watch-ad-btn" class="ad-btn">
-                📺 Watch Ad (+200 Gold)
-            </button>
+            <div id="tab-content">
 
-            <h2>Select Game Mode</h2>
-            <div class="mode-selection">
-                <button class="mode-btn" data-mode="0">
-                    <h3>2 / 4 Cards</h3>
-                    <p>Cost: 50 Gold</p>
-                    <p>Max Prize: 200</p>
-                </button>
-                <button class="mode-btn" data-mode="1">
-                    <h3>4 / 10 Cards</h3>
-                    <p>Cost: 100 Gold</p>
-                    <p>Max Prize: 10,000</p>
-                </button>
-                <button class="mode-btn" data-mode="2">
-                    <h3>6 / 20 Cards</h3>
-                    <p>Cost: 500 Gold</p>
-                    <p>Max Prize: 1,000,000,000</p>
-                </button>
+                <!-- SINGLE PLAYER TAB -->
+                <section id="single-tab" class="tab-pane active">
+                    <!-- Single Lobby -->
+                    <div id="single-lobby">
+                        <button id="watch-ad-btn" class="ad-btn">
+                            📺 Watch Ad (+200 Gold)
+                        </button>
+
+                        <h2>Select Game Mode</h2>
+                        <div class="mode-selection">
+                            <button class="mode-btn" data-mode="0">
+                                <h3>2 / 4 Cards</h3>
+                                <p>Cost: 50 Gold</p>
+                                <p>Max Prize: 200</p>
+                            </button>
+                            <button class="mode-btn" data-mode="1">
+                                <h3>4 / 10 Cards</h3>
+                                <p>Cost: 100 Gold</p>
+                                <p>Max Prize: 10,000</p>
+                            </button>
+                            <button class="mode-btn" data-mode="2">
+                                <h3>6 / 20 Cards</h3>
+                                <p>Cost: 500 Gold</p>
+                                <p>Max Prize: 1,000,000,000</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Single Game -->
+                    <div id="single-game" class="hidden">
+                        <div class="game-header">
+                            <button id="single-back-btn">Exit</button>
+                            <span id="single-prize-display" class="hidden"></span>
+                        </div>
+                        <h2 id="single-game-title">Game Mode</h2>
+
+                        <!-- Phase 1 -->
+                        <div id="single-setup">
+                            <p>Select <span id="single-target-count">X</span> distinct numbers (1-<span id="single-max-num">Y</span>):</p>
+                            <div id="single-inputs" class="inputs-container"></div>
+                            <p id="single-setup-error" class="error"></p>
+                            <button id="single-start-btn">Start Game</button>
+                        </div>
+
+                        <!-- Phase 2 -->
+                        <div id="single-play" class="hidden">
+                            <p id="single-status">Find your numbers!</p>
+                            <div id="single-grid" class="grid-container"></div>
+                        </div>
+
+                        <div id="single-result" class="hidden">
+                            <h3 id="single-result-msg"></h3>
+                            <button id="single-collect-btn">Collect & Return</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MULTIPLAYER TAB -->
+                <section id="multi-tab" class="tab-pane">
+                    <!-- Multi Lobby -->
+                    <div id="multi-lobby-view">
+                        <div class="multi-layout">
+                            <div class="chat-panel">
+                                <h3>Chat</h3>
+                                <div id="chat-messages" class="chat-box"></div>
+                                <div class="chat-input-area">
+                                    <input type="text" id="chat-input" placeholder="Type a message...">
+                                    <button id="chat-send-btn">Send</button>
+                                </div>
+                            </div>
+                            <div class="users-panel">
+                                <h3>Online Users</h3>
+                                <ul id="online-users-list"></ul>
+                            </div>
+                        </div>
+                        <div class="multi-controls">
+                            <button id="create-room-btn" class="action-btn">Create Game</button>
+                            <button id="join-room-btn" class="action-btn">Join Game</button>
+                        </div>
+                    </div>
+
+                    <!-- Room List -->
+                    <div id="room-list-view" class="hidden">
+                        <h3>Available Rooms</h3>
+                        <ul id="rooms-list" class="rooms-list"></ul>
+                        <button id="back-to-multi-lobby">Back</button>
+                    </div>
+
+                    <!-- Game Room -->
+                    <div id="multi-game-room" class="hidden">
+                        <div class="room-header">
+                            <h3 id="room-id-display">Room #ID</h3>
+                            <button id="leave-room-btn">Leave Room</button>
+                        </div>
+
+                        <div class="room-layout">
+                            <div class="room-main">
+                                <div id="room-game-area">
+                                     <!-- Setup Phase -->
+                                     <div id="multi-setup" class="hidden">
+                                         <p>Select 6 numbers (1-40):</p>
+                                         <div id="multi-inputs" class="inputs-container"></div>
+                                         <button id="multi-ready-btn">Ready</button>
+                                     </div>
+
+                                     <!-- Play Phase -->
+                                     <div id="multi-play" class="hidden">
+                                          <div id="multi-info-bar">
+                                              <span id="multi-turn-display"></span>
+                                              <span id="multi-timer-display"></span>
+                                          </div>
+                                          <div id="multi-grid" class="grid-container small-grid"></div>
+                                          <button id="multi-reveal-btn" class="hidden">Reveal Card</button>
+                                     </div>
+
+                                     <!-- Result -->
+                                     <div id="multi-result" class="hidden">
+                                         <h3 id="multi-result-msg"></h3>
+                                     </div>
+                                </div>
+                            </div>
+                            <div class="room-sidebar">
+                                <h4>Players</h4>
+                                <ul id="room-players-list"></ul>
+                                <div id="host-controls" class="hidden">
+                                    <button id="start-multi-game-btn" disabled>Start Game</button>
+                                </div>
+                                <div class="room-chat">
+                                    <div id="room-chat-messages" class="chat-box small"></div>
+                                    <input type="text" id="room-chat-input" placeholder="Room chat...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SETTINGS TAB -->
+                <section id="settings-tab" class="tab-pane">
+                    <h2>Settings</h2>
+
+                    <div class="settings-group">
+                        <h3>Change Password</h3>
+                        <input type="password" id="new-password" placeholder="New Password">
+                        <button id="change-password-btn">Update Password</button>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>Gift Gold</h3>
+                        <p>Minimum 100,000 Gold</p>
+                        <input type="text" id="gift-username" placeholder="Recipient Username">
+                        <input type="number" id="gift-amount" placeholder="Amount" min="100000">
+                        <button id="gift-gold-btn">Send Gift</button>
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
 
-        <!-- Game Screen -->
-        <section id="game-screen" class="screen hidden">
-            <div class="game-header">
-                <button id="back-to-lobby">Exit</button>
-                <span id="current-prize-display" class="hidden"></span>
-                <span id="game-gold-display">Gold: 0</span>
+        <!-- Create Room Modal -->
+        <div id="create-room-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Create Room</h3>
+                <p>Mode: 6/40 Cards (Fixed)</p>
+                <label>Game Speed:</label>
+                <select id="room-mode-type">
+                    <option value="auto">Auto (2s/card)</option>
+                    <option value="manual">Manual (5s turn)</option>
+                </select>
+                <div class="modal-actions">
+                    <button id="confirm-create-room">Create</button>
+                    <button id="cancel-create-room">Cancel</button>
+                </div>
             </div>
+        </div>
 
-            <h2 id="game-title">Game Mode</h2>
-
-            <!-- Phase 1: Number Selection -->
-            <div id="setup-phase">
-                <p>Select <span id="target-count">X</span> distinct numbers (1-30):</p>
-                <div id="number-inputs" class="inputs-container"></div>
-                <p id="setup-error" class="error"></p>
-                <button id="start-game-btn">Start Game</button>
-            </div>
-
-            <!-- Phase 2: Card Reveal -->
-            <div id="play-phase" class="hidden">
-                <p id="game-status">Find your numbers!</p>
-                <div id="cards-grid" class="grid-container"></div>
-            </div>
-
-            <div id="game-result" class="hidden">
-                <h3 id="result-message"></h3>
-                <button id="collect-btn">Collect & Return</button>
-            </div>
-        </section>
-
-        <!-- Ad Modal -->
+        <!-- Ad Modal (Existing) -->
         <div id="ad-modal" class="modal hidden">
             <div class="modal-content">
                 <h3>Watching Ad...</h3>
@@ -97,10 +226,12 @@
                 <p id="ad-timer">5s remaining</p>
             </div>
         </div>
+
     </div>
 
     <script src="js/auth.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/multiplayer.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
