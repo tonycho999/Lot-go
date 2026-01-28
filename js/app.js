@@ -51,6 +51,7 @@ const App = {
         this.toggleAuthBtn = document.getElementById('toggle-auth-btn');
 
         // Lobby
+        this.headerLogoutBtn = document.getElementById('header-logout-btn');
         this.userGoldDisplay = document.getElementById('user-gold');
         this.modeButtons = document.querySelectorAll('.mode-btn');
         this.watchAdBtn = document.getElementById('watch-ad-btn');
@@ -132,6 +133,7 @@ const App = {
     bindEvents: function() {
         this.authActionBtn.addEventListener('click', this.handleAuthAction.bind(this));
         this.toggleAuthBtn.addEventListener('click', this.toggleAuthMode.bind(this));
+        this.headerLogoutBtn.addEventListener('click', this.handleLogout.bind(this));
 
         this.modeButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -194,12 +196,12 @@ const App = {
         if (this.isSignupMode) {
             this.authTitle.textContent = "Sign Up for Lot-Go";
             this.authActionBtn.textContent = "Sign Up";
-            this.toggleAuthBtn.textContent = "Login";
+            this.toggleAuthBtn.textContent = "Have an account? Login";
             this.confirmPasswordGroup.classList.remove('hidden');
         } else {
             this.authTitle.textContent = "Login to Lot-Go";
             this.authActionBtn.textContent = "Login";
-            this.toggleAuthBtn.textContent = "Sign Up";
+            this.toggleAuthBtn.textContent = "Create Account";
             this.confirmPasswordGroup.classList.add('hidden');
         }
         this.authError.textContent = "";
@@ -247,9 +249,21 @@ const App = {
             onRoomsUpdate: (rooms) => this.renderRoomsList(rooms),
             onRoomStateUpdate: (room) => this.updateRoomUI(room),
             onJoinSuccess: (roomId) => this.showScreen('mp-room-screen'),
-            onError: (msg) => alert(msg),
+            onError: (msg) => this.renderMultiplayerError(msg),
             onGameStart: (room) => this.enterMultiplayerGame(room)
         });
+    },
+
+    renderMultiplayerError: function(msg) {
+        if (this.roomsList) {
+            this.roomsList.innerHTML = `
+                <div class="error-banner" style="background: #e74c3c; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <strong>Error:</strong> ${msg}
+                </div>
+            `;
+        } else {
+            alert(msg);
+        }
     },
 
     showLobby: function() {

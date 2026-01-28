@@ -22,13 +22,19 @@
                 <input type="password" id="confirm-password" placeholder="Confirm Password">
             </div>
             <button id="auth-action-btn">Login</button>
-            <p id="toggle-auth">Don't have an account? <a href="#" id="toggle-auth-btn">Sign Up</a></p>
+            <div style="margin-top: 15px;">
+                <button id="toggle-auth-btn" class="secondary-btn">Create Account</button>
+            </div>
             <p id="auth-error" class="error"></p>
         </section>
 
         <!-- Lobby Screen -->
         <section id="lobby-screen" class="screen hidden">
-            <h1>Lot-Go Lobby</h1>
+            <div class="lobby-header">
+                <h1>Lot-Go Lobby</h1>
+                <button id="header-logout-btn" class="small-btn">Log Out</button>
+            </div>
+
             <div class="gold-display">
                 Your Gold: <span id="user-gold">0</span>
             </div>

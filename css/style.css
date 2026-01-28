@@ -529,3 +529,26 @@ button:active {
     padding: 20px;
     border-radius: 15px;
 }
+
+/* Lobby Header */
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.lobby-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.secondary-btn {
+    background: #ecf0f1;
+    color: #4a4036;
+    border: 1px solid #bdc3c7;
+}
+
+.secondary-btn:hover {
+    background: #bdc3c7;
+}
