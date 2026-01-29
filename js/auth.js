@@ -3,12 +3,21 @@
 const Auth = {
     // Helper to convert username to email
     usernameToEmail: function(username) {
-        // Simple sanitization
+        // 1. Check if it's the admin
         const cleanName = username.trim().toLowerCase();
         if (cleanName === 'admin') {
             return 'admin@test.com';
         }
-        return `${cleanName}@lotgo.app`;
+
+        // 2. If it contains '@', assume it's a valid email
+        if (cleanName.includes('@')) {
+            return cleanName;
+        }
+
+        // 3. Otherwise, sanitize for local part
+        // Remove everything that isn't a-z, 0-9, ., _, or -
+        const sanitized = cleanName.replace(/[^a-z0-9._-]/g, '');
+        return `${sanitized}@lotgo.app`;
     },
 
     /**
