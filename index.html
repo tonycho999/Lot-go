@@ -37,18 +37,18 @@
             <div class="mode-selection">
                 <button class="mode-btn" data-mode="0">
                     <h3>2 / 4 Cards</h3>
-                    <p>Cost: 50 Gold</p>
-                    <p>Max Prize: 200</p>
+                    <p>Cost: 100 Gold</p>
+                    <p>Max Prize: 500</p>
                 </button>
                 <button class="mode-btn" data-mode="1">
                     <h3>4 / 10 Cards</h3>
-                    <p>Cost: 100 Gold</p>
-                    <p>Max Prize: 10,000</p>
+                    <p>Cost: 200 Gold</p>
+                    <p>Max Prize: 40,000</p>
                 </button>
                 <button class="mode-btn" data-mode="2">
                     <h3>6 / 20 Cards</h3>
                     <p>Cost: 500 Gold</p>
-                    <p>Max Prize: 1,000,000,000</p>
+                    <p>Max Prize: 15,000,000</p>
                 </button>
             </div>
         </section>
@@ -65,7 +65,7 @@
 
             <!-- Phase 1: Number Selection -->
             <div id="setup-phase">
-                <p>Select <span id="target-count">X</span> distinct numbers (1-30):</p>
+                <p>Select <span id="target-count">X</span> distinct numbers <span id="number-range-display"></span>:</p>
                 <div id="number-inputs" class="inputs-container"></div>
                 <p id="setup-error" class="error"></p>
                 <button id="start-game-btn">Start Game</button>
@@ -74,6 +74,7 @@
             <!-- Phase 2: Card Reveal -->
             <div id="play-phase" class="hidden">
                 <p id="game-status">Find your numbers!</p>
+                <div id="selected-numbers-display" class="selected-numbers-container"></div>
                 <div id="cards-grid" class="grid-container"></div>
             </div>
 

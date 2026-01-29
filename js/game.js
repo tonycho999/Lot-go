@@ -9,8 +9,8 @@ const Game = {
             totalCards: 4,
             targetCount: 2,
             maxNumber: 4,
-            cost: 50,
-            maxPrize: 198
+            cost: 100,
+            maxPrize: 500
         },
         {
             id: 1,
@@ -18,8 +18,8 @@ const Game = {
             totalCards: 10,
             targetCount: 4,
             maxNumber: 10,
-            cost: 100,
-            maxPrize: 1113
+            cost: 200,
+            maxPrize: 40000
         },
         {
             id: 2,
@@ -28,7 +28,7 @@ const Game = {
             targetCount: 6,
             maxNumber: 20,
             cost: 500,
-            maxPrize: 11414
+            maxPrize: 15000000
         }
     ],
 

@@ -367,3 +367,44 @@ button:active {
     font-weight: bold;
     color: #7f8c8d;
 }
+
+/* Custom Grid Layouts */
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.grid-cols-5 {
+    grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* Selected Numbers Display */
+.selected-numbers-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.selected-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #f1c40f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #4a4036;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.selected-number.found {
+    background: #e67e22; /* Orange */
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
+    border-color: #d35400;
+}

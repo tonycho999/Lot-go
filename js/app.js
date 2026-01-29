@@ -39,6 +39,7 @@ const App = {
         // Phase 1
         this.setupPhase = document.getElementById('setup-phase');
         this.targetCountSpan = document.getElementById('target-count');
+        this.numberRangeDisplay = document.getElementById('number-range-display');
         this.numberInputsContainer = document.getElementById('number-inputs');
         this.setupError = document.getElementById('setup-error');
         this.startGameBtn = document.getElementById('start-game-btn');
@@ -46,6 +47,7 @@ const App = {
         // Phase 2
         this.playPhase = document.getElementById('play-phase');
         this.gameStatus = document.getElementById('game-status');
+        this.selectedNumbersDisplay = document.getElementById('selected-numbers-display');
         this.cardsGrid = document.getElementById('cards-grid');
 
         // Result
@@ -156,6 +158,7 @@ const App = {
             const mode = Game.MODES[modeIndex];
             this.gameTitle.textContent = mode.name;
             this.targetCountSpan.textContent = mode.targetCount;
+            this.numberRangeDisplay.textContent = `(1-${mode.maxNumber})`;
 
             // Render Inputs
             this.renderNumberInputs(mode.targetCount, mode.maxNumber);
@@ -214,6 +217,7 @@ const App = {
             this.updateGoldDisplays();
 
             this.renderBoard();
+            this.renderSelectedNumbers(selected);
             this.gameStatus.textContent = `Find ${Game.MODES[Game.state.currentModeIndex].targetCount} targets!`;
             this.updatePrizeDisplay();
             this.currentPrizeDisplay.classList.remove('hidden');
@@ -230,8 +234,28 @@ const App = {
         this.currentPrizeDisplay.textContent = `Next Prize: ${current.toLocaleString()}`;
     },
 
+    renderSelectedNumbers: function(selectedNumbers) {
+        this.selectedNumbersDisplay.innerHTML = '';
+        selectedNumbers.sort((a, b) => a - b).forEach(num => {
+            const el = document.createElement('div');
+            el.className = 'selected-number';
+            el.dataset.number = num;
+            el.textContent = num;
+            this.selectedNumbersDisplay.appendChild(el);
+        });
+    },
+
     renderBoard: function() {
         this.cardsGrid.innerHTML = '';
+
+        // Update Grid Layout
+        this.cardsGrid.classList.remove('grid-cols-4', 'grid-cols-5');
+        if (Game.state.currentModeIndex === 0) {
+            this.cardsGrid.classList.add('grid-cols-4');
+        } else {
+            this.cardsGrid.classList.add('grid-cols-5');
+        }
+
         Game.state.cards.forEach((card, index) => {
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
@@ -269,6 +293,14 @@ const App = {
         if (!result) return; // Ignore click (already revealed, etc)
 
         this.updateCard(cardEl, result.card);
+
+        if (result.card.isTarget) {
+            const numberEl = this.selectedNumbersDisplay.querySelector(`.selected-number[data-number="${result.card.value}"]`);
+            if (numberEl) {
+                numberEl.classList.add('found');
+            }
+        }
+
         this.updatePrizeDisplay();
 
         if (result.gameOver) {
