@@ -196,7 +196,7 @@ const App = {
             if (result.success) {
                 this.loginError.textContent = '';
             } else {
-                this.loginError.textContent = 'Invalid credentials or connection error';
+                this.loginError.textContent = result.message || 'Invalid credentials or connection error';
                 console.error(result.message);
             }
         }
