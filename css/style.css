@@ -96,6 +96,19 @@ button:active {
     font-weight: 500;
 }
 
+/* Toggle Auth */
+.toggle-auth {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.toggle-auth a {
+    color: #f39c12;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 /* Lobby */
 .gold-display {
     font-size: 1.4rem;
@@ -108,6 +121,33 @@ button:active {
     display: inline-block;
     border: 2px solid #f1c40f;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* Tabs */
+.tabs-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    background: #fff;
+    border: 1px solid #eee;
+    color: #7f8c8d;
+    padding: 10px 30px;
+    font-size: 0.9rem;
+}
+
+.tab-btn.active {
+    background: #f1c40f;
+    color: #4a4036;
+    border-color: #f1c40f;
+    box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease;
 }
 
 .mode-selection {
@@ -142,6 +182,56 @@ button:active {
 .mode-btn p {
     margin: 2px 0;
     color: #7f8c8d;
+}
+
+/* Profile Section */
+.profile-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+}
+
+.profile-section h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #d35400;
+}
+
+/* Danger Zone - Smaller and Less Visible */
+.danger-zone-container {
+    border-color: #ffdce0;
+    background: #fffbfb;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    margin-top: 40px;
+    padding: 15px;
+}
+
+.danger-zone-container:hover {
+    opacity: 1;
+}
+
+.danger-zone-container h3 {
+    font-size: 0.9rem;
+    color: #c0392b;
+    margin-bottom: 10px;
+}
+
+.danger-btn {
+    background: #ecf0f1;
+    color: #c0392b;
+    font-size: 0.8rem;
+    padding: 8px 15px;
+    box-shadow: none;
+    border: 1px solid #e74c3c;
+}
+
+.danger-btn:hover {
+    background: #c0392b;
+    color: white;
 }
 
 /* Game */
@@ -366,4 +456,10 @@ button:active {
 #ad-timer {
     font-weight: bold;
     color: #7f8c8d;
+}
+
+.message.success {
+    color: #27ae60;
+    margin-top: 10px;
+    font-weight: 500;
 }

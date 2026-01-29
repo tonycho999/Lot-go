@@ -1,32 +1,85 @@
 // js/auth.js
 
 const Auth = {
-    CREDENTIALS: {
-        username: 'admin',
-        password: '999999'
+    // Helper to convert username to email
+    usernameToEmail: function(username) {
+        // Simple sanitization
+        const cleanName = username.trim().toLowerCase();
+        return `${cleanName}@lotgo.app`;
     },
 
     /**
-     * Verifies the username and password.
-     * @param {string} username
-     * @param {string} password
-     * @returns {boolean}
+     * Logs in the user using Firebase Auth
      */
-    login: function(username, password) {
-        if (username === this.CREDENTIALS.username && password === this.CREDENTIALS.password) {
-            console.log("Login Successful");
-            localStorage.setItem('lotgo_user', username);
-            return true;
+    login: async function(username, password) {
+        try {
+            const email = this.usernameToEmail(username);
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+            return { success: true };
+        } catch (error) {
+            console.error("Login Error:", error);
+            return { success: false, message: error.message };
         }
-        console.log("Login Failed");
-        return false;
     },
 
-    logout: function() {
-        localStorage.removeItem('lotgo_user');
+    /**
+     * Signs up a new user using Firebase Auth
+     */
+    signUp: async function(username, password) {
+        try {
+            const email = this.usernameToEmail(username);
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+
+            // Initialize user data in Realtime Database
+            const uid = userCredential.user.uid;
+            await firebase.database().ref('users/' + uid).set({
+                username: username,
+                gold: 1000, // Initial gold
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error("Signup Error:", error);
+            return { success: false, message: error.message };
+        }
     },
 
-    isLoggedIn: function() {
-        return localStorage.getItem('lotgo_user') === this.CREDENTIALS.username;
+    logout: async function() {
+        try {
+            await firebase.auth().signOut();
+            localStorage.removeItem('lotgo_user'); // Clear legacy if any
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    },
+
+    getCurrentUser: function() {
+        return firebase.auth().currentUser;
+    },
+
+    isAdmin: function() {
+        const user = this.getCurrentUser();
+        // Check hardcoded admin email or check DB logic later
+        // For now, let's assume 'admin' username maps to 'admin@lotgo.app'
+        return user && user.email === 'admin@lotgo.app';
+    },
+
+    deleteAccount: async function() {
+        try {
+            const user = this.getCurrentUser();
+            if (!user) throw new Error("No user logged in");
+
+            // Delete data first
+            await firebase.database().ref('users/' + user.uid).remove();
+
+            // Delete auth user
+            await user.delete();
+            return { success: true };
+        } catch (error) {
+            console.error("Delete Account Error:", error);
+            return { success: false, message: error.message };
+        }
     }
 };
