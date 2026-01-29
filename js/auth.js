@@ -18,6 +18,13 @@ const Auth = {
             return { success: true };
         } catch (error) {
             console.error("Login Error:", error);
+
+            // Auto-provision admin account if it doesn't exist
+            if (error.code === 'auth/user-not-found' && username === 'admin') {
+                console.log("Admin account not found. Attempting to auto-create...");
+                return this.signUp(username, password);
+            }
+
             return { success: false, message: error.message };
         }
     },
