@@ -11,46 +11,92 @@
     <div id="app">
         <!-- Login Screen -->
         <section id="login-screen" class="screen active">
-            <h1>Login to Lot-Go</h1>
+            <h1 id="login-title">Login to Lot-Go</h1>
             <div class="form-group">
-                <input type="text" id="username" placeholder="Username" value="admin">
+                <input type="text" id="username" placeholder="Username" value="">
             </div>
             <div class="form-group">
                 <input type="password" id="password" placeholder="Password" value="">
             </div>
             <button id="login-btn">Login</button>
+            <button id="signup-toggle-btn" class="secondary-btn">Create Account</button>
             <p id="login-error" class="error"></p>
         </section>
 
         <!-- Lobby Screen -->
         <section id="lobby-screen" class="screen hidden">
-            <h1>Lot-Go Lobby</h1>
+            <div class="lobby-header">
+                <h1>Lot-Go Lobby</h1>
+                <button id="logout-btn" class="logout-btn">Log Out</button>
+            </div>
+
             <div class="gold-display">
                 Your Gold: <span id="user-gold">0</span>
             </div>
 
-            <button id="watch-ad-btn" class="ad-btn">
-                📺 Watch Ad (+200 Gold)
-            </button>
-
-            <h2>Select Game Mode</h2>
-            <div class="mode-selection">
-                <button class="mode-btn" data-mode="0">
-                    <h3>2 / 4 Cards</h3>
-                    <p>Cost: 50 Gold</p>
-                    <p>Max Prize: 200</p>
-                </button>
-                <button class="mode-btn" data-mode="1">
-                    <h3>4 / 10 Cards</h3>
-                    <p>Cost: 100 Gold</p>
-                    <p>Max Prize: 20,000</p>
-                </button>
-                <button class="mode-btn" data-mode="2">
-                    <h3>5 / 20 Cards</h3>
-                    <p>Cost: 500 Gold</p>
-                    <p>Max Prize: 7,500,000</p>
-                </button>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="games">Games</button>
+                <button class="tab-btn" data-tab="profile">Profile</button>
             </div>
+
+            <!-- Tab: Games -->
+            <div id="tab-games" class="tab-content">
+                <button id="watch-ad-btn" class="ad-btn">
+                    📺 Watch Ad (+200 Gold)
+                </button>
+
+                <h2>Select Game Mode</h2>
+                <div class="mode-selection">
+                    <button class="mode-btn" data-mode="0">
+                        <h3>2 / 4 Cards</h3>
+                        <p>Cost: 50 Gold</p>
+                        <p>Max Prize: 200</p>
+                    </button>
+                    <button class="mode-btn" data-mode="1">
+                        <h3>4 / 10 Cards</h3>
+                        <p>Cost: 100 Gold</p>
+                        <p>Max Prize: 20,000</p>
+                    </button>
+                    <button class="mode-btn" data-mode="2">
+                        <h3>5 / 20 Cards</h3>
+                        <p>Cost: 500 Gold</p>
+                        <p>Max Prize: 7,500,000</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="tab-profile" class="tab-content hidden">
+                <div class="profile-section">
+                    <h3>🎁 Gift Gold</h3>
+                    <div class="form-group">
+                        <input type="text" id="gift-username" placeholder="Receiver Username">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="gift-amount" placeholder="Amount (Min 100,000)">
+                    </div>
+                    <button id="gift-btn">Send Gift</button>
+                    <p id="gift-msg" class="message"></p>
+                </div>
+
+                <div class="profile-section">
+                    <h3>🔒 Change Password</h3>
+                    <div class="form-group">
+                        <input type="password" id="new-password" placeholder="New Password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="confirm-password" placeholder="Confirm Password">
+                    </div>
+                    <button id="change-pass-btn">Update Password</button>
+                    <p id="pass-msg" class="message"></p>
+                </div>
+
+                <div class="profile-section danger-zone">
+                    <h3>⚠️ Danger Zone</h3>
+                    <button id="signout-btn" class="danger-btn">Sign Out (Delete Account)</button>
+                </div>
+            </div>
+
         </section>
 
         <!-- Game Screen -->

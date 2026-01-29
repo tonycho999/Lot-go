@@ -34,7 +34,8 @@ const Game = {
 
     // State
     state: {
-        gold: 1000,
+        username: null,
+        gold: 0,
         currentModeIndex: null,
         targetNumbers: [],
         cards: [],
@@ -44,8 +45,48 @@ const Game = {
         lastPrize: 0
     },
 
+    loadUserData: function(username) {
+        this.state.username = username;
+        const savedGold = localStorage.getItem(`lotgo_gold_${username}`);
+        this.state.gold = savedGold ? parseInt(savedGold) : 1000; // Default 1000 for new users
+    },
+
+    saveUserData: function() {
+        if (this.state.username) {
+            localStorage.setItem(`lotgo_gold_${this.state.username}`, this.state.gold);
+        }
+    },
+
     addGold: function(amount) {
         this.state.gold += amount;
+        this.saveUserData();
+    },
+
+    giftGold: function(receiverUsername, amount) {
+        if (this.state.gold < amount) {
+            return { success: false, message: "Insufficient gold" };
+        }
+
+        // Check if receiver exists (We need to check Auth but Game doesn't direct link easily unless passed.
+        // We can check localStorage 'lotgo_users')
+        const usersJSON = localStorage.getItem('lotgo_users');
+        const users = usersJSON ? JSON.parse(usersJSON) : {};
+
+        if (!users[receiverUsername]) {
+            return { success: false, message: "User not found" };
+        }
+
+        // Deduct from current
+        this.state.gold -= amount;
+        this.saveUserData();
+
+        // Add to receiver
+        const receiverGoldKey = `lotgo_gold_${receiverUsername}`;
+        const currentReceiverGold = localStorage.getItem(receiverGoldKey);
+        const newReceiverGold = (currentReceiverGold ? parseInt(currentReceiverGold) : 1000) + amount;
+        localStorage.setItem(receiverGoldKey, newReceiverGold);
+
+        return { success: true, message: `Sent ${amount} Gold to ${receiverUsername}!` };
     },
 
     /**
@@ -85,6 +126,7 @@ const Game = {
 
         // Deduct Gold
         this.state.gold -= mode.cost;
+        this.saveUserData(); // Save gold deduction
         this.state.targetNumbers = selectedNumbers;
 
         // Generate Cards
@@ -96,16 +138,12 @@ const Game = {
         }));
 
         // 2. Add Dud Cards
-        // For duds, we pick numbers from the allowed range (1 to maxNumber) that are NOT in selectedNumbers
         const allNumbers = Array.from({length: mode.maxNumber}, (_, i) => i + 1);
         const availableDuds = allNumbers.filter(n => !selectedNumbers.includes(n));
 
-        // Shuffle available duds to pick random ones
         this.shuffle(availableDuds);
 
         const dudsNeeded = mode.totalCards - mode.targetCount;
-        // In "Bingo" logic with full set (e.g. 2/4 from 1-4), dudsNeeded == availableDuds.length
-        // But if logic changes, we take dudsNeeded
         const duds = availableDuds.slice(0, dudsNeeded);
 
         duds.forEach(dud => {
@@ -147,6 +185,7 @@ const Game = {
             this.state.isGameOver = true;
             this.state.lastPrize = this.calculateReward();
             this.state.gold += this.state.lastPrize;
+            this.saveUserData(); // Save win
             return {
                 success: true,
                 card: card,
@@ -165,7 +204,6 @@ const Game = {
 
     /**
      * Calculates reward based on efficiency.
-     * Formula: MaxPrize * ((TotalCards - OpenedCards) / (TotalCards - TargetCount))^2
      */
     calculateReward: function() {
         return this.calculateRewardForRevealed(this.state.revealedCount);
@@ -180,15 +218,12 @@ const Game = {
         const N = mode.totalCards;
         const K = mode.targetCount;
 
-        // If M == K (perfect game), term is 1.
-        // If M == N (worst game), term is 0.
         const numerator = N - M;
         const denominator = N - K;
 
         if (denominator === 0) return mode.maxPrize;
 
         const factor = numerator / denominator;
-        // Clamp factor to 1 (can't win more than maxPrize)
         const clampedFactor = Math.min(1, factor);
 
         const prize = Math.floor(mode.maxPrize * Math.pow(clampedFactor, 2));
@@ -196,11 +231,6 @@ const Game = {
         return Math.max(0, prize);
     },
 
-    /**
-     * Calculates the prize based on the current revealed count.
-     * Use this for display if we want to show "Current Pot" status
-     * rather than "Projected Win".
-     */
     getCurrentPrizeValue: function() {
         return this.calculateRewardForRevealed(this.state.revealedCount);
     },

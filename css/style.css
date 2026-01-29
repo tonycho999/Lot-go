@@ -90,13 +90,115 @@ button:active {
     box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1);
 }
 
+.secondary-btn {
+    background-color: #eee;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.secondary-btn:hover {
+    background-color: #ddd;
+}
+
+.danger-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.danger-btn:hover {
+    background-color: #c0392b;
+}
+
 .error {
     color: #e74c3c;
     margin-top: 10px;
     font-weight: 500;
 }
 
-/* Lobby */
+.message {
+    margin-top: 10px;
+    font-weight: 500;
+}
+.message.success { color: #27ae60; }
+.message.error { color: #e74c3c; }
+
+
+/* Lobby Header */
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.lobby-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+.logout-btn {
+    font-size: 0.8rem;
+    padding: 8px 15px;
+    background: #e74c3c;
+    color: white;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.tab-btn {
+    background: transparent;
+    color: #7f8c8d;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 10px 20px;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    background: transparent;
+    transform: none;
+    color: #f39c12;
+}
+
+.tab-btn.active {
+    color: #f39c12;
+    border-bottom: 3px solid #f1c40f;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Profile Section */
+.profile-section {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
+.profile-section h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.danger-zone {
+    border: 1px solid #fab1a0;
+    background: #fff0eb;
+}
+
+.danger-zone h3 {
+    color: #e74c3c;
+}
+
+/* Lobby Gold */
 .gold-display {
     font-size: 1.4rem;
     font-weight: bold;

@@ -5,6 +5,7 @@ const App = {
         this.cacheDOM();
         this.bindEvents();
         this.checkAuth();
+        this.isSignupMode = false;
     },
 
     cacheDOM: function() {
@@ -15,15 +16,40 @@ const App = {
         };
 
         // Login
+        this.loginTitle = document.getElementById('login-title');
         this.loginBtn = document.getElementById('login-btn');
+        this.signupToggleBtn = document.getElementById('signup-toggle-btn');
         this.usernameInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.loginError = document.getElementById('login-error');
 
-        // Lobby
+        // Lobby Header
+        this.logoutBtn = document.getElementById('logout-btn');
+
+        // Lobby Tabs
+        this.tabBtns = document.querySelectorAll('.tab-btn');
+        this.tabContents = {
+            games: document.getElementById('tab-games'),
+            profile: document.getElementById('tab-profile')
+        };
+
+        // Lobby Content
         this.userGoldDisplay = document.getElementById('user-gold');
         this.modeButtons = document.querySelectorAll('.mode-btn');
         this.watchAdBtn = document.getElementById('watch-ad-btn');
+
+        // Profile Features
+        this.giftUsername = document.getElementById('gift-username');
+        this.giftAmount = document.getElementById('gift-amount');
+        this.giftBtn = document.getElementById('gift-btn');
+        this.giftMsg = document.getElementById('gift-msg');
+
+        this.newPassword = document.getElementById('new-password');
+        this.confirmPassword = document.getElementById('confirm-password');
+        this.changePassBtn = document.getElementById('change-pass-btn');
+        this.passMsg = document.getElementById('pass-msg');
+
+        this.signoutBtn = document.getElementById('signout-btn');
 
         // Ad Modal
         this.adModal = document.getElementById('ad-modal');
@@ -56,8 +82,25 @@ const App = {
     },
 
     bindEvents: function() {
-        this.loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        // Auth
+        this.loginBtn.addEventListener('click', this.handleLoginOrSignup.bind(this));
+        this.signupToggleBtn.addEventListener('click', this.toggleSignupMode.bind(this));
+        this.logoutBtn.addEventListener('click', this.handleLogout.bind(this));
 
+        // Tabs
+        this.tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.target.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+
+        // Profile Actions
+        this.giftBtn.addEventListener('click', this.handleGift.bind(this));
+        this.changePassBtn.addEventListener('click', this.handleChangePassword.bind(this));
+        this.signoutBtn.addEventListener('click', this.handleSignOut.bind(this));
+
+        // Game Actions
         this.modeButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modeIndex = parseInt(btn.closest('.mode-btn').dataset.mode);
@@ -71,12 +114,13 @@ const App = {
 
         // Card clicks are delegated to the grid
         this.cardsGrid.addEventListener('click', this.handleCardClick.bind(this));
-
         this.collectBtn.addEventListener('click', this.showLobby.bind(this));
     },
 
     checkAuth: function() {
-        if (Auth.isLoggedIn()) {
+        const user = Auth.getCurrentUser();
+        if (user) {
+            Game.loadUserData(user);
             this.showLobby();
         } else {
             this.showScreen('login');
@@ -91,15 +135,141 @@ const App = {
         this.screens[screenName].classList.add('active');
     },
 
-    handleLogin: function() {
+    // Auth Logic
+    toggleSignupMode: function() {
+        this.isSignupMode = !this.isSignupMode;
+        if (this.isSignupMode) {
+            this.loginTitle.textContent = "Create Account";
+            this.loginBtn.textContent = "Sign Up";
+            this.signupToggleBtn.textContent = "Back to Login";
+        } else {
+            this.loginTitle.textContent = "Login to Lot-Go";
+            this.loginBtn.textContent = "Login";
+            this.signupToggleBtn.textContent = "Create Account";
+        }
+        this.loginError.textContent = '';
+    },
+
+    handleLoginOrSignup: function() {
         const username = this.usernameInput.value;
         const password = this.passwordInput.value;
 
-        if (Auth.login(username, password)) {
-            this.showLobby();
-            this.loginError.textContent = '';
+        if (!username || !password) {
+            this.loginError.textContent = 'Please enter username and password';
+            return;
+        }
+
+        if (this.isSignupMode) {
+            const res = Auth.signup(username, password);
+            if (res.success) {
+                alert(res.message);
+                this.toggleSignupMode(); // Switch back to login
+            } else {
+                this.loginError.textContent = res.message;
+            }
         } else {
-            this.loginError.textContent = 'Invalid credentials';
+            const res = Auth.login(username, password);
+            if (res.success) {
+                this.checkAuth();
+                this.loginError.textContent = '';
+            } else {
+                this.loginError.textContent = res.message;
+            }
+        }
+    },
+
+    handleLogout: function() {
+        Auth.logout();
+        this.checkAuth();
+    },
+
+    // Tab Logic
+    switchTab: function(tabName) {
+        this.tabBtns.forEach(btn => {
+            if (btn.dataset.tab === tabName) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        Object.keys(this.tabContents).forEach(key => {
+            if (key === tabName) this.tabContents[key].classList.remove('hidden');
+            else this.tabContents[key].classList.add('hidden');
+        });
+
+        // Clear messages when switching
+        this.giftMsg.textContent = '';
+        this.passMsg.textContent = '';
+    },
+
+    // Profile Logic
+    handleGift: function() {
+        const receiver = this.giftUsername.value;
+        const amount = parseInt(this.giftAmount.value);
+
+        if (!receiver || isNaN(amount)) {
+            this.giftMsg.textContent = "Invalid input.";
+            this.giftMsg.className = "message error";
+            return;
+        }
+
+        if (amount < 100000) {
+            this.giftMsg.textContent = "Minimum gift amount is 100,000.";
+            this.giftMsg.className = "message error";
+            return;
+        }
+
+        const res = Game.giftGold(receiver, amount);
+        if (res.success) {
+            this.giftMsg.textContent = res.message;
+            this.giftMsg.className = "message success";
+            this.updateGoldDisplays();
+            this.giftAmount.value = '';
+            this.giftUsername.value = '';
+        } else {
+            this.giftMsg.textContent = res.message;
+            this.giftMsg.className = "message error";
+        }
+    },
+
+    handleChangePassword: function() {
+        const newPass = this.newPassword.value;
+        const confirmPass = this.confirmPassword.value;
+
+        if (!newPass || !confirmPass) {
+            this.passMsg.textContent = "Please fill all fields.";
+            this.passMsg.className = "message error";
+            return;
+        }
+
+        if (newPass !== confirmPass) {
+            this.passMsg.textContent = "Passwords do not match.";
+            this.passMsg.className = "message error";
+            return;
+        }
+
+        const user = Auth.getCurrentUser();
+        const res = Auth.changePassword(user, newPass);
+
+        if (res.success) {
+            this.passMsg.textContent = res.message;
+            this.passMsg.className = "message success";
+            this.newPassword.value = '';
+            this.confirmPassword.value = '';
+        } else {
+            this.passMsg.textContent = res.message;
+            this.passMsg.className = "message error";
+        }
+    },
+
+    handleSignOut: function() {
+        if (confirm("Are you sure you want to delete your account? This cannot be undone.")) {
+            const user = Auth.getCurrentUser();
+            const res = Auth.deleteAccount(user);
+            if (res.success) {
+                alert(res.message);
+                this.checkAuth();
+            } else {
+                alert(res.message);
+            }
         }
     },
 
@@ -110,8 +280,8 @@ const App = {
 
     updateGoldDisplays: function() {
         const gold = Game.state.gold;
-        this.userGoldDisplay.textContent = gold.toLocaleString();
-        this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
+        if (this.userGoldDisplay) this.userGoldDisplay.textContent = gold.toLocaleString();
+        if (this.gameGoldDisplay) this.gameGoldDisplay.textContent = `Gold: ${gold.toLocaleString()}`;
     },
 
     handleWatchAd: function() {
