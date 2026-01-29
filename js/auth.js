@@ -5,6 +5,9 @@ const Auth = {
     usernameToEmail: function(username) {
         // Simple sanitization
         const cleanName = username.trim().toLowerCase();
+        if (cleanName === 'admin') {
+            return 'admin@test.com';
+        }
         return `${cleanName}@lotgo.app`;
     },
 
@@ -69,8 +72,7 @@ const Auth = {
     isAdmin: function() {
         const user = this.getCurrentUser();
         // Check hardcoded admin email or check DB logic later
-        // For now, let's assume 'admin' username maps to 'admin@lotgo.app'
-        return user && user.email === 'admin@lotgo.app';
+        return user && user.email === 'admin@test.com';
     },
 
     deleteAccount: async function() {
