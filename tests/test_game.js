@@ -51,4 +51,32 @@ let finalRes = Game.revealCard(targetIndices2[1]); // 3rd click (found 2, total 
 // Formula: 200 * ((4-3)/(4-2))^2 = 200 * (1/2)^2 = 200 * 0.25 = 50
 if (finalRes.prize !== 50) throw new Error(`Imperfect game prize wrong. Expected 50, got ${finalRes.prize}`);
 
+
+// 6. Test Mode 2 (5/20 Cards)
+console.log("Testing Mode 2...");
+Game.setupGame(2);
+const mode2 = Game.MODES[2];
+if (mode2.totalCards !== 20 || mode2.targetCount !== 5 || mode2.maxPrize !== 7500000) {
+    throw new Error("Mode 2 Configuration Error");
+}
+// Start Mode 2 Game
+const m2Numbers = [1, 2, 3, 4, 5];
+Game.startGame(m2Numbers);
+if (Game.state.cards.length !== 20) throw new Error("Mode 2 should have 20 cards");
+
+// Perfect Game Mode 2
+Game.setupGame(2);
+Game.startGame(m2Numbers);
+const targetsM2 = Game.state.cards
+    .map((c, i) => c.isTarget ? i : -1)
+    .filter(i => i !== -1);
+targetsM2.forEach((idx, i) => {
+    let res = Game.revealCard(idx);
+    if (i === targetsM2.length - 1) {
+        if (!res.win) throw new Error("Mode 2 Perfect Game failed");
+        if (res.prize !== 7500000) throw new Error(`Mode 2 Prize Wrong. Got ${res.prize}`);
+    }
+});
+
+
 console.log("Game Logic Tests Passed.");

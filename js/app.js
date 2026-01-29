@@ -39,6 +39,7 @@ const App = {
         // Phase 1
         this.setupPhase = document.getElementById('setup-phase');
         this.targetCountSpan = document.getElementById('target-count');
+        this.maxNumberDisplay = document.getElementById('max-number-display');
         this.numberInputsContainer = document.getElementById('number-inputs');
         this.setupError = document.getElementById('setup-error');
         this.startGameBtn = document.getElementById('start-game-btn');
@@ -156,6 +157,13 @@ const App = {
             const mode = Game.MODES[modeIndex];
             this.gameTitle.textContent = mode.name;
             this.targetCountSpan.textContent = mode.targetCount;
+            if (this.maxNumberDisplay) {
+                this.maxNumberDisplay.textContent = mode.maxNumber;
+            }
+
+            // Set Grid Layout Class
+            this.cardsGrid.className = 'grid-container'; // Reset
+            this.cardsGrid.classList.add(`mode-${modeIndex}`);
 
             // Render Inputs
             this.renderNumberInputs(mode.targetCount, mode.maxNumber);

@@ -19,16 +19,16 @@ const Game = {
             targetCount: 4,
             maxNumber: 10,
             cost: 100,
-            maxPrize: 10000
+            maxPrize: 20000
         },
         {
             id: 2,
-            name: "6/40 Cards",
-            totalCards: 40,
-            targetCount: 6,
-            maxNumber: 40,
+            name: "5/20 Cards",
+            totalCards: 20,
+            targetCount: 5,
+            maxNumber: 20,
             cost: 500,
-            maxPrize: 1000000000
+            maxPrize: 7500000
         }
     ],
 
