@@ -180,18 +180,16 @@ const Game = {
         const N = mode.totalCards;
         const K = mode.targetCount;
 
-        // If M == K (perfect game), term is 1.
-        // If M == N (worst game), term is 0.
-        const numerator = N - M;
-        const denominator = N - K;
+        // If M == K (perfect game), factor is 1.
+        // For each additional card, reduce prize by 50%.
+        const extraCards = M - K;
 
-        if (denominator === 0) return mode.maxPrize;
+        if (extraCards <= 0) {
+            return mode.maxPrize;
+        }
 
-        const factor = numerator / denominator;
-        // Clamp factor to 1 (can't win more than maxPrize)
-        const clampedFactor = Math.min(1, factor);
-
-        const prize = Math.floor(mode.maxPrize * Math.pow(clampedFactor, 2));
+        const decayFactor = Math.pow(0.5, extraCards);
+        const prize = Math.floor(mode.maxPrize * decayFactor);
 
         return Math.max(0, prize);
     },

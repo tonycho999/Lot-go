@@ -48,7 +48,7 @@ Game.revealCard(dudIndex); // 1st click (waste)
 Game.revealCard(targetIndices2[0]); // 2nd click (found 1)
 let finalRes = Game.revealCard(targetIndices2[1]); // 3rd click (found 2, total 3 opened)
 
-// Formula: 198 * ((4-3)/(4-2))^2 = 198 * (1/2)^2 = 198 * 0.25 = 49.5 -> 49
-if (finalRes.prize !== 49) throw new Error(`Imperfect game prize wrong. Expected 49, got ${finalRes.prize}`);
+// Formula: 198 * (0.5)^(3-2) = 198 * 0.5 = 99
+if (finalRes.prize !== 99) throw new Error(`Imperfect game prize wrong. Expected 99, got ${finalRes.prize}`);
 
 console.log("Game Logic Tests Passed.");
