@@ -3,39 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lot-go WebApp</title>
+    <title>Lot-go Game</title>
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --bg: #f1f5f9; }
+        :root { --primary: #6366f1; --success: #22c55e; --bg: #f1f5f9; --dark: #1e293b; }
         body { font-family: sans-serif; background: var(--bg); display: flex; justify-content: center; margin: 0; padding: 20px; }
-        .app { background: white; width: 100%; max-width: 450px; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .app { background: white; width: 100%; max-width: 450px; border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        /* Top Navigation */
         .modes { display: flex; gap: 8px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: #e2e8f0; cursor: pointer; font-weight: bold; }
-        .mode-btn.active { background: var(--primary); color: white; }
+        .mode-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; background: #e2e8f0; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .mode-btn.active { background: var(--dark); color: white; }
 
-        /* Stats & Picks */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; }
-        .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
-        .stat-value { font-size: 18px; font-weight: bold; color: #1e293b; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0; }
+        .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 18px; font-weight: bold; color: var(--dark); }
         
-        .picks-container { margin-bottom: 20px; text-align: center; }
-        .picks-label { font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block; }
-        .picks-list { display: flex; justify-content: center; gap: 8px; }
-        .pick-item { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 50%; font-weight: bold; transition: 0.3s; }
-        .pick-item.matched { background: var(--success); color: white; transform: scale(1.1); }
+        .picks-bar { margin-bottom: 20px; text-align: center; padding: 10px; border-radius: 12px; background: #eff6ff; }
+        .picks-list { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+        .pick-item { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid #cbd5e1; border-radius: 50%; font-weight: bold; font-size: 14px; }
+        .pick-item.matched { background: var(--success); color: white; border-color: var(--success); }
 
-        /* Board Styles */
-        .board { display: grid; gap: 8px; margin-bottom: 20px; }
-        .card { height: 60px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .card.selected { border-color: var(--primary); background: #e0e7ff; }
-        .card.opened { background: #334155; color: white; border-color: #334155; }
-        .card.matched { background: var(--success) !important; border-color: var(--success); }
+        .board { display: grid; gap: 10px; margin-bottom: 20px; }
+        .card { height: 70px; background: white; border: 2px solid #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; position: relative; }
+        .card.selected { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
+        .card.hidden { background: var(--dark); border-color: var(--dark); color: white; }
+        .card.opened { background: #f1f5f9; border-color: #cbd5e1; color: var(--dark); cursor: default; }
+        .card.matched { background: var(--success) !important; color: white !important; border-color: var(--success); }
 
-        /* Controls */
-        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-start { background: var(--primary); color: white; }
-        .btn-open { background: #ec4899; color: white; }
+        .btn-start { width: 100%; padding: 18px; border: none; border-radius: 16px; background: var(--primary); color: white; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+        .btn-start:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -47,35 +42,35 @@
         <button class="mode-btn" onclick="setMode(3)">M3</button>
     </div>
 
-    <div class="stats-grid">
-        <div><div class="stat-label">Coins</div><div id="ui-coins" class="stat-value">10,000</div></div>
-        <div><div class="stat-label">Prize</div><div id="ui-prize" class="stat-value">0</div></div>
+    <div class="stats">
+        <div><div class="stat-label">My Coins</div><div id="ui-coins" class="stat-value">10,000</div></div>
+        <div><div class="stat-label">Current Prize</div><div id="ui-prize" class="stat-value">0</div></div>
     </div>
 
-    <div class="picks-container" id="picks-container" style="display:none;">
-        <span class="picks-label">YOUR PICKS</span>
+    <div class="picks-bar" id="picks-container" style="visibility: hidden;">
+        <span class="stat-label">Target Numbers</span>
         <div class="picks-list" id="ui-picks"></div>
     </div>
 
     <div id="board" class="board"></div>
 
-    <button id="btn-main" class="btn-action btn-start" onclick="handleMainAction()">Start Game (100)</button>
+    <button id="btn-start" class="btn-start" onclick="startGame()">Start Game (100)</button>
 </div>
 
 <script>
     const config = {
-        1: { total: 4, pick: 2, cost: 100, max: 400, cols: 4, m:9, target:3 },
-        2: { total: 10, pick: 4, cost: 200, max: 30000, cols: 5, m:100, target:9 },
-        3: { total: 20, pick: 6, cost: 500, max: 12000000, cols: 5, m:200, target:19 }
+        1: { total: 4, pick: 2, cost: 100, max: 400, cols: 4, m: 1, target: 4 }, // Mode 1 is simple
+        2: { total: 10, pick: 4, cost: 200, max: 30000, cols: 5, m: 100, target: 9 },
+        3: { total: 20, pick: 6, cost: 500, max: 12000000, cols: 5, m: 200, target: 19 }
     };
 
-    let mode = 1, coins = 10000, picks = [], winning = [], opened = 0, active = false;
+    let mode = 1, coins = 10000, picks = [], deck = [], openedCount = 0, active = false;
 
     function setMode(m) {
         if(active) return;
         mode = m;
         document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', i+1 === m));
-        document.getElementById('btn-main').innerText = `Start Game (${config[m].cost})`;
+        document.getElementById('btn-start').innerText = `Start Game (${config[m].cost})`;
         init();
     }
 
@@ -84,20 +79,24 @@
         const c = config[mode];
         b.style.gridTemplateColumns = `repeat(${c.cols}, 1fr)`;
         b.innerHTML = '';
-        picks = []; opened = 0; active = false;
-        document.getElementById('picks-container').style.display = 'none';
+        picks = []; active = false; openedCount = 0;
+        document.getElementById('picks-container').style.visibility = 'hidden';
         document.getElementById('ui-prize').innerText = '0';
+        document.getElementById('btn-start').style.display = 'block';
         
         for(let i=1; i<=c.total; i++) {
             const el = document.createElement('div');
             el.className = 'card'; el.innerText = i;
-            el.onclick = () => select(i, el);
+            el.onclick = () => selectCard(i, el);
             b.appendChild(el);
         }
     }
 
-    function select(n, el) {
-        if(active) return;
+    function selectCard(n, el) {
+        if(active) {
+            revealCard(n, el);
+            return;
+        }
         if(picks.includes(n)) {
             picks = picks.filter(p => p !== n); el.classList.remove('selected');
         } else if(picks.length < config[mode].pick) {
@@ -105,90 +104,84 @@
         }
     }
 
-    function handleMainAction() {
-        if(!active) {
-            if(picks.length !== config[mode].pick) return alert('Select your numbers!');
-            if(coins < config[mode].cost) return alert('Not enough coins!');
-            start();
-        } else {
-            openNext();
-        }
-    }
+    function startGame() {
+        const c = config[mode];
+        if(picks.length !== c.pick) return alert(`Select ${c.pick} numbers!`);
+        if(coins < c.cost) return alert('Not enough coins!');
 
-    function start() {
+        coins -= c.cost;
         active = true;
-        coins -= config[mode].cost;
-        opened = config[mode].pick;
+        document.getElementById('ui-coins').innerText = coins.toLocaleString();
+        document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('picks-container').style.visibility = 'visible';
         
-        // Generate winning numbers
-        winning = [];
-        let pool = Array.from({length: config[mode].total}, (_, i) => i + 1);
-        for(let i=0; i<config[mode].pick; i++) {
-            winning.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-        }
-
-        updatePicksUI();
-        document.getElementById('btn-main').innerText = 'Open Next Card';
-        document.getElementById('btn-main').className = 'btn-action btn-open';
-        refreshBoard();
-        calcAndCheck();
-    }
-
-    function updatePicksUI() {
-        const container = document.getElementById('picks-container');
+        // Setup Deck
+        deck = Array.from({length: c.total}, (_, i) => i + 1);
+        
+        // Setup Picks UI
         const list = document.getElementById('ui-picks');
-        container.style.display = 'block';
         list.innerHTML = picks.map(p => `<div class="pick-item" id="pick-${p}">${p}</div>`).join('');
-    }
 
-    function refreshBoard() {
+        // Hide Numbers
         const cards = document.querySelectorAll('.card');
-        cards.forEach(el => {
-            const n = parseInt(el.innerText);
-            el.classList.remove('selected');
-            el.className = 'card';
-            if(winning.slice(0, opened).includes(n)) {
-                el.classList.add('opened');
-                if(picks.includes(n)) {
-                    el.classList.add('matched');
-                    document.getElementById(`pick-${n}`).classList.add('matched');
-                }
-            }
+        cards.forEach(card => {
+            card.innerText = '?';
+            card.className = 'card hidden';
         });
+
+        updatePrize();
     }
 
-    function openNext() {
-        if(opened < config[mode].total) {
-            opened++;
-            refreshBoard();
-            calcAndCheck();
+    function revealCard(n, el) {
+        if(!el.classList.contains('hidden')) return;
+        
+        openedCount++;
+        el.innerText = n;
+        el.classList.remove('hidden');
+        el.classList.add('opened');
+
+        if(picks.includes(n)) {
+            el.classList.add('matched');
+            document.getElementById(`pick-${n}`).classList.add('matched');
         }
+
+        updatePrize();
+        checkResult();
     }
 
-    function calcAndCheck() {
+    function updatePrize() {
         const c = config[mode];
         let prize = 0;
-        const matchedCount = picks.filter(p => winning.slice(0, opened).includes(p)).length;
-
-        if (matchedCount === c.pick) {
+        
+        if (openedCount < c.pick) {
+            prize = c.max;
+        } else if (openedCount === c.total) {
+            prize = 0;
+        } else {
             if (mode === 1) {
-                prize = opened === 2 ? 400 : (opened === 3 ? 200 : 0);
+                const p1 = {2: 400, 3: 200, 4: 0};
+                prize = p1[openedCount] || 0;
             } else {
-                if (opened === c.total) prize = 0;
-                else {
-                    let ratio = Math.pow((c.m / c.max), (opened - c.pick) / (c.target - c.pick));
-                    prize = Math.floor((c.max * ratio) / 10) * 10;
-                }
+                let ratio = Math.pow((c.m / c.max), (openedCount - c.pick) / (c.target - c.pick));
+                prize = Math.floor((c.max * ratio) / 10) * 10;
             }
         }
-
         document.getElementById('ui-prize').innerText = prize.toLocaleString();
-        document.getElementById('ui-coins').innerText = coins.toLocaleString();
+    }
 
-        if (matchedCount === c.pick || opened === c.total) {
+    function checkResult() {
+        const c = config[mode];
+        const matchedCount = picks.filter(p => {
+            const el = Array.from(document.querySelectorAll('.card')).find(card => card.innerText == p);
+            return el && el.classList.contains('opened');
+        }).length;
+
+        if (matchedCount === c.pick || openedCount === c.total) {
+            const finalPrize = parseInt(document.getElementById('ui-prize').innerText.replace(/,/g, ''));
+            active = false;
             setTimeout(() => {
-                alert(prize > 0 ? `Win! ${prize} coins` : "Game Over");
-                coins += prize;
+                alert(matchedCount === c.pick ? `Winner! Received ${finalPrize.toLocaleString()} coins.` : "Game Over!");
+                coins += finalPrize;
                 setMode(mode);
             }, 500);
         }
