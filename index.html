@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lot-go Game</title>
+    <title>Lot-go Game (Shuffled)</title>
     <style>
         :root { --primary: #6366f1; --success: #22c55e; --bg: #f1f5f9; --dark: #1e293b; }
         body { font-family: sans-serif; background: var(--bg); display: flex; justify-content: center; margin: 0; padding: 20px; }
@@ -59,7 +59,7 @@
 
 <script>
     const config = {
-        1: { total: 4, pick: 2, cost: 100, max: 400, cols: 4, m: 1, target: 4 }, // Mode 1 is simple
+        1: { total: 4, pick: 2, cost: 100, max: 400, cols: 2, m: 1, target: 4 },
         2: { total: 10, pick: 4, cost: 200, max: 30000, cols: 5, m: 100, target: 9 },
         3: { total: 20, pick: 6, cost: 500, max: 12000000, cols: 5, m: 200, target: 19 }
     };
@@ -87,16 +87,14 @@
         for(let i=1; i<=c.total; i++) {
             const el = document.createElement('div');
             el.className = 'card'; el.innerText = i;
-            el.onclick = () => selectCard(i, el);
+            // 초기 선택 단계에서의 클릭 이벤트
+            el.onclick = () => selectInitialCard(i, el);
             b.appendChild(el);
         }
     }
 
-    function selectCard(n, el) {
-        if(active) {
-            revealCard(n, el);
-            return;
-        }
+    function selectInitialCard(n, el) {
+        if(active) return;
         if(picks.includes(n)) {
             picks = picks.filter(p => p !== n); el.classList.remove('selected');
         } else if(picks.length < config[mode].pick) {
@@ -106,8 +104,8 @@
 
     function startGame() {
         const c = config[mode];
-        if(picks.length !== c.pick) return alert(`Select ${c.pick} numbers!`);
-        if(coins < c.cost) return alert('Not enough coins!');
+        if(picks.length !== c.pick) return alert(`먼저 ${c.pick}개의 숫자를 선택하세요!`);
+        if(coins < c.cost) return alert('코인이 부족합니다!');
 
         coins -= c.cost;
         active = true;
@@ -115,25 +113,32 @@
         document.getElementById('btn-start').style.display = 'none';
         document.getElementById('picks-container').style.visibility = 'visible';
         
-        // Setup Deck
+        // 1. 덱 생성 및 셔플 (Fisher-Yates)
         deck = Array.from({length: c.total}, (_, i) => i + 1);
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
         
-        // Setup Picks UI
+        // 2. 타겟 숫자 UI 표시
         const list = document.getElementById('ui-picks');
         list.innerHTML = picks.map(p => `<div class="pick-item" id="pick-${p}">${p}</div>`).join('');
 
-        // Hide Numbers
+        // 3. 보드판을 뒷면으로 전환 및 실제 값 할당
         const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
+        cards.forEach((card, index) => {
+            const hiddenValue = deck[index]; // 셔플된 덱의 값
             card.innerText = '?';
             card.className = 'card hidden';
+            // 게임 시작 후의 클릭 이벤트 (숨겨진 값 전달)
+            card.onclick = () => revealCard(hiddenValue, card);
         });
 
         updatePrize();
     }
 
     function revealCard(n, el) {
-        if(!el.classList.contains('hidden')) return;
+        if(!active || !el.classList.contains('hidden')) return;
         
         openedCount++;
         el.innerText = n;
@@ -142,7 +147,8 @@
 
         if(picks.includes(n)) {
             el.classList.add('matched');
-            document.getElementById(`pick-${n}`).classList.add('matched');
+            const targetPick = document.getElementById(`pick-${n}`);
+            if(targetPick) targetPick.classList.add('matched');
         }
 
         updatePrize();
@@ -171,18 +177,21 @@
 
     function checkResult() {
         const c = config[mode];
-        const matchedCount = picks.filter(p => {
-            const el = Array.from(document.querySelectorAll('.card')).find(card => card.innerText == p);
-            return el && el.classList.contains('opened');
-        }).length;
+        // 현재까지 맞춘 개수 확인
+        const matchedCount = document.querySelectorAll('.card.matched').length;
 
         if (matchedCount === c.pick || openedCount === c.total) {
             const finalPrize = parseInt(document.getElementById('ui-prize').innerText.replace(/,/g, ''));
             active = false;
             setTimeout(() => {
-                alert(matchedCount === c.pick ? `Winner! Received ${finalPrize.toLocaleString()} coins.` : "Game Over!");
-                coins += finalPrize;
-                setMode(mode);
+                if(matchedCount === c.pick) {
+                    alert(`축하합니다! ${finalPrize.toLocaleString()} 코인을 획득했습니다.`);
+                    coins += finalPrize;
+                } else {
+                    alert("게임 오버! 숫자를 모두 맞추지 못했습니다.");
+                }
+                setMode(mode); // 게임 초기화
+                document.getElementById('ui-coins').innerText = coins.toLocaleString();
             }, 500);
         }
     }
