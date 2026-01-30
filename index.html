@@ -3,104 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lot-Go</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Lot-go WebApp</title>
+    <style>
+        :root { --primary: #6366f1; --success: #22c55e; --bg: #f1f5f9; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; justify-content: center; margin: 0; padding: 20px; }
+        .app { background: white; width: 100%; max-width: 450px; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        /* Top Navigation */
+        .modes { display: flex; gap: 8px; margin-bottom: 20px; }
+        .mode-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: #e2e8f0; cursor: pointer; font-weight: bold; }
+        .mode-btn.active { background: var(--primary); color: white; }
+
+        /* Stats & Picks */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; }
+        .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+        .stat-value { font-size: 18px; font-weight: bold; color: #1e293b; }
+        
+        .picks-container { margin-bottom: 20px; text-align: center; }
+        .picks-label { font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block; }
+        .picks-list { display: flex; justify-content: center; gap: 8px; }
+        .pick-item { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 50%; font-weight: bold; transition: 0.3s; }
+        .pick-item.matched { background: var(--success); color: white; transform: scale(1.1); }
+
+        /* Board Styles */
+        .board { display: grid; gap: 8px; margin-bottom: 20px; }
+        .card { height: 60px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .card.selected { border-color: var(--primary); background: #e0e7ff; }
+        .card.opened { background: #334155; color: white; border-color: #334155; }
+        .card.matched { background: var(--success) !important; border-color: var(--success); }
+
+        /* Controls */
+        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--primary); color: white; }
+        .btn-open { background: #ec4899; color: white; }
+    </style>
 </head>
 <body>
 
-    <div id="app">
-        <!-- Login Screen -->
-        <section id="login-screen" class="screen active">
-            <h1>Login to Lot-Go</h1>
-            <div class="form-group">
-                <input type="text" id="username" placeholder="Username" value="admin">
-            </div>
-            <div class="form-group">
-                <input type="password" id="password" placeholder="Password" value="">
-            </div>
-            <button id="login-btn">Login</button>
-            <p id="login-error" class="error"></p>
-        </section>
-
-        <!-- Lobby Screen -->
-        <section id="lobby-screen" class="screen hidden">
-            <h1>Lot-Go Lobby</h1>
-            <div class="gold-display">
-                Your Gold: <span id="user-gold">0</span>
-            </div>
-
-            <button id="watch-ad-btn" class="ad-btn">
-                📺 Watch Ad (+200 Gold)
-            </button>
-
-            <h2>Select Game Mode</h2>
-            <div class="mode-selection">
-                <button class="mode-btn" data-mode="0">
-                    <h3>2 / 4 Cards</h3>
-                    <p>Cost: 50 Gold</p>
-                    <p>Max Prize: 200</p>
-                </button>
-                <button class="mode-btn" data-mode="1">
-                    <h3>4 / 10 Cards</h3>
-                    <p>Cost: 100 Gold</p>
-                    <p>Max Prize: 10,000</p>
-                </button>
-                <button class="mode-btn" data-mode="2">
-                    <h3>6 / 20 Cards</h3>
-                    <p>Cost: 500 Gold</p>
-                    <p>Max Prize: 1,000,000,000</p>
-                </button>
-            </div>
-        </section>
-
-        <!-- Game Screen -->
-        <section id="game-screen" class="screen hidden">
-            <div class="game-header">
-                <button id="back-to-lobby">Exit</button>
-                <span id="current-prize-display" class="hidden"></span>
-                <span id="game-gold-display">Gold: 0</span>
-            </div>
-
-            <h2 id="game-title">Game Mode</h2>
-
-            <!-- Phase 1: Number Selection -->
-            <div id="setup-phase">
-                <p>Select <span id="target-count">X</span> distinct numbers (1-30):</p>
-                <div id="number-inputs" class="inputs-container"></div>
-                <p id="setup-error" class="error"></p>
-                <button id="start-game-btn">Start Game</button>
-            </div>
-
-            <!-- Phase 2: Card Reveal -->
-            <div id="play-phase" class="hidden">
-                <p id="game-status">Find your numbers!</p>
-                <div id="cards-grid" class="grid-container"></div>
-            </div>
-
-            <div id="game-result" class="hidden">
-                <h3 id="result-message"></h3>
-                <button id="collect-btn">Collect & Return</button>
-            </div>
-        </section>
-
-        <!-- Ad Modal -->
-        <div id="ad-modal" class="modal hidden">
-            <div class="modal-content">
-                <h3>Watching Ad...</h3>
-                <div class="ad-placeholder">
-                    <div class="spinner"></div>
-                    <p>Playing generic advertisement...</p>
-                </div>
-                <div class="progress-bar-container">
-                    <div id="ad-progress" class="progress-bar"></div>
-                </div>
-                <p id="ad-timer">5s remaining</p>
-            </div>
-        </div>
+<div class="app">
+    <div class="modes">
+        <button class="mode-btn active" onclick="setMode(1)">M1</button>
+        <button class="mode-btn" onclick="setMode(2)">M2</button>
+        <button class="mode-btn" onclick="setMode(3)">M3</button>
     </div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/app.js"></script>
+    <div class="stats-grid">
+        <div><div class="stat-label">Coins</div><div id="ui-coins" class="stat-value">10,000</div></div>
+        <div><div class="stat-label">Prize</div><div id="ui-prize" class="stat-value">0</div></div>
+    </div>
+
+    <div class="picks-container" id="picks-container" style="display:none;">
+        <span class="picks-label">YOUR PICKS</span>
+        <div class="picks-list" id="ui-picks"></div>
+    </div>
+
+    <div id="board" class="board"></div>
+
+    <button id="btn-main" class="btn-action btn-start" onclick="handleMainAction()">Start Game (100)</button>
+</div>
+
+<script>
+    const config = {
+        1: { total: 4, pick: 2, cost: 100, max: 400, cols: 4, m:9, target:3 },
+        2: { total: 10, pick: 4, cost: 200, max: 30000, cols: 5, m:100, target:9 },
+        3: { total: 20, pick: 6, cost: 500, max: 12000000, cols: 5, m:200, target:19 }
+    };
+
+    let mode = 1, coins = 10000, picks = [], winning = [], opened = 0, active = false;
+
+    function setMode(m) {
+        if(active) return;
+        mode = m;
+        document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', i+1 === m));
+        document.getElementById('btn-main').innerText = `Start Game (${config[m].cost})`;
+        init();
+    }
+
+    function init() {
+        const b = document.getElementById('board');
+        const c = config[mode];
+        b.style.gridTemplateColumns = `repeat(${c.cols}, 1fr)`;
+        b.innerHTML = '';
+        picks = []; opened = 0; active = false;
+        document.getElementById('picks-container').style.display = 'none';
+        document.getElementById('ui-prize').innerText = '0';
+        
+        for(let i=1; i<=c.total; i++) {
+            const el = document.createElement('div');
+            el.className = 'card'; el.innerText = i;
+            el.onclick = () => select(i, el);
+            b.appendChild(el);
+        }
+    }
+
+    function select(n, el) {
+        if(active) return;
+        if(picks.includes(n)) {
+            picks = picks.filter(p => p !== n); el.classList.remove('selected');
+        } else if(picks.length < config[mode].pick) {
+            picks.push(n); el.classList.add('selected');
+        }
+    }
+
+    function handleMainAction() {
+        if(!active) {
+            if(picks.length !== config[mode].pick) return alert('Select your numbers!');
+            if(coins < config[mode].cost) return alert('Not enough coins!');
+            start();
+        } else {
+            openNext();
+        }
+    }
+
+    function start() {
+        active = true;
+        coins -= config[mode].cost;
+        opened = config[mode].pick;
+        
+        // Generate winning numbers
+        winning = [];
+        let pool = Array.from({length: config[mode].total}, (_, i) => i + 1);
+        for(let i=0; i<config[mode].pick; i++) {
+            winning.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+        }
+
+        updatePicksUI();
+        document.getElementById('btn-main').innerText = 'Open Next Card';
+        document.getElementById('btn-main').className = 'btn-action btn-open';
+        refreshBoard();
+        calcAndCheck();
+    }
+
+    function updatePicksUI() {
+        const container = document.getElementById('picks-container');
+        const list = document.getElementById('ui-picks');
+        container.style.display = 'block';
+        list.innerHTML = picks.map(p => `<div class="pick-item" id="pick-${p}">${p}</div>`).join('');
+    }
+
+    function refreshBoard() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(el => {
+            const n = parseInt(el.innerText);
+            el.classList.remove('selected');
+            el.className = 'card';
+            if(winning.slice(0, opened).includes(n)) {
+                el.classList.add('opened');
+                if(picks.includes(n)) {
+                    el.classList.add('matched');
+                    document.getElementById(`pick-${n}`).classList.add('matched');
+                }
+            }
+        });
+    }
+
+    function openNext() {
+        if(opened < config[mode].total) {
+            opened++;
+            refreshBoard();
+            calcAndCheck();
+        }
+    }
+
+    function calcAndCheck() {
+        const c = config[mode];
+        let prize = 0;
+        const matchedCount = picks.filter(p => winning.slice(0, opened).includes(p)).length;
+
+        if (matchedCount === c.pick) {
+            if (mode === 1) {
+                prize = opened === 2 ? 400 : (opened === 3 ? 200 : 0);
+            } else {
+                if (opened === c.total) prize = 0;
+                else {
+                    let ratio = Math.pow((c.m / c.max), (opened - c.pick) / (c.target - c.pick));
+                    prize = Math.floor((c.max * ratio) / 10) * 10;
+                }
+            }
+        }
+
+        document.getElementById('ui-prize').innerText = prize.toLocaleString();
+        document.getElementById('ui-coins').innerText = coins.toLocaleString();
+
+        if (matchedCount === c.pick || opened === c.total) {
+            setTimeout(() => {
+                alert(prize > 0 ? `Win! ${prize} coins` : "Game Over");
+                coins += prize;
+                setMode(mode);
+            }, 500);
+        }
+    }
+
+    init();
+</script>
 </body>
 </html>
